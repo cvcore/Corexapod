@@ -22,6 +22,5 @@ int main() {
 		std::cout << "Caught exception: " << eMsg << "\n";
 	}
 	return 0;
-	//test
 }
 
