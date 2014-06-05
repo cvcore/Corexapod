@@ -88,7 +88,7 @@ void Leg::setPosition(Eigen::Vector3f pos, Plane& refPlane) {
 					obOffset,
 					bb,
 					bd;
-	obOffset << 0, 0, refPlane.origin_(3) - 29.f;
+	obOffset << 0, 0, refPlane.origin_(2) - 29.f;
 	float lbd, lbd2, theta, delta;
 	const float lbc2 = leg2Len * leg2Len,
 				lcd2 = leg1Len * leg1Len,
