@@ -9,9 +9,13 @@
 #ifndef ENGINE_H_
 #define ENGINE_H_
 
+#include "serial.h"
 #include "Eigen/Dense"
 #include <cmath>
 #include <cassert>
+#include <vector>
+#include <sstream>
+#include <iostream>
 
 namespace hex {
 
@@ -22,21 +26,22 @@ class Leg;
 
 class Servo {
 public:
-	Servo(int jointType, SideType side);
+	Servo(int jointType, SideType side, int number);
 //	~Servo();
 	void setPW(int pw);
 	void setAngle(float angle);
 	int getPW();
 	friend class Leg;
+	friend class Plane;
 private:
-	int _minPW, _maxPW, _curPW, _speed;
+	int _minPW, _maxPW, _curPW, _speed, _number;
 	float _angle;
 	bool _changed;
 };
 
 class Leg {
 public:
-	Leg(SideType side, Eigen::Vector3f origin, Eigen::Vector3f pos);
+	Leg(SideType side, const Eigen::Vector3f& origin, const Eigen::Vector3f& pos, const std::vector<int>& servoNumber);
 	~Leg();
 	void setPosition(Eigen::Vector3f pos, Plane& refPlane);
 	friend class Plane;
@@ -53,6 +58,7 @@ public:
 	~Plane();
 	void rotate(float roll, float pitch, float yaw);
 	void rotate(Eigen::Vector3f newNormal);
+	void writeSerial(Serial& serial);
 //	void rotate(Eigen::Quaternion q);
 	Eigen::Vector3f projection(Eigen::Vector3f point);
 

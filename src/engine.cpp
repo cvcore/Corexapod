@@ -15,14 +15,15 @@ const float initHeight = 29.0f + 140.801278f;
 const float leg1Len = 140.801278;
 const float leg2Len = 86.0;
 
-Servo::Servo(int jointType, SideType side) {
+Servo::Servo(int jointType, SideType side, int number) {
 	_speed = 100;
 	_curPW = 1500;
 	_changed = true;
+	_number = number;
 	if(side == left) {
 		if(jointType % 3 == 2) {
 			_minPW = 1500;
-			_maxPW = 3500;
+			_maxPW = -3500;
 			_angle = 0.f;
 		} else {
 			_minPW = 2500;
@@ -30,9 +31,9 @@ Servo::Servo(int jointType, SideType side) {
 			_angle = 90.f;
 		}
 	} else if(side == right) {
-		if(jointType % 3 ==1) {
+		if(jointType % 3 == 2) {
 			_minPW = 1500;
-			_maxPW = 3500;
+			_maxPW = -3500;
 			_angle = 0.f;
 		} else {
 			_minPW = 500;
@@ -52,10 +53,11 @@ void Servo::setAngle(float angle) {
 		_changed = true;
 }
 
-Leg::Leg(SideType side, Eigen::Vector3f origin, Eigen::Vector3f pos) : _origin(origin), _initOrigin(origin), _pos(pos), _side(side) {
+Leg::Leg(SideType side, const Eigen::Vector3f& origin, const Eigen::Vector3f& pos, const std::vector<int>& servoNumber)
+: _origin(origin), _initOrigin(origin), _pos(pos), _side(side) {
 	int sIdx;
 	for(sIdx = 0; sIdx < 3; sIdx++) {
-		_servo[sIdx] = new Servo(sIdx, side);
+		_servo[sIdx] = new Servo(sIdx, side, servoNumber[sIdx]);
 	}
 }
 
@@ -65,9 +67,8 @@ Leg::~Leg() {
 	}
 }
 
-
-
 void Leg::setPosition(Eigen::Vector3f pos, Plane& refPlane) {
+	_pos = pos;
 	Eigen::Vector3f pp = refPlane.projection(pos),
 					ol = _origin - refPlane.origin_,
 					lp = pp - _origin,
@@ -79,9 +80,9 @@ void Leg::setPosition(Eigen::Vector3f pos, Plane& refPlane) {
 		beta = -beta;
 	}
 	if(_side == left)
-		_servo[2]->setAngle(beta - alpha);
-	else
 		_servo[2]->setAngle(alpha - beta);
+	else
+		_servo[2]->setAngle(beta - alpha);
 
 	Eigen::Vector3f ob = _initOrigin.cross(initNormal),
 					obOffsetZ,
@@ -94,7 +95,7 @@ void Leg::setPosition(Eigen::Vector3f pos, Plane& refPlane) {
 				lbc  = leg2Len,
 				lcd  = leg1Len;
 
-	Eigen::AngleAxisf yaw(_servo[2]->_angle, Eigen::Vector3f(0, 0, 1));
+	Eigen::AngleAxisf yaw(_servo[2]->_angle, Eigen::Vector3f(0, 0, 1));//TODO: monitor this
 	ob = yaw * ob;
 	if(_side == left) {
 		ob = ob * 8.f / ob.norm();
@@ -104,7 +105,7 @@ void Leg::setPosition(Eigen::Vector3f pos, Plane& refPlane) {
 	obOffsetZ += _initOrigin;
 	bb = ob + obOffsetZ;
 	bb = refPlane.rotater_ * bb;
-	bd = _pos - bb;
+	bd = pos - bb;
 	lbd = bd.norm();
 	lbd2 = bd.squaredNorm();
 	_servo[0]->setAngle(acos((lbc2 + lcd2 - lbd2) / (2 * lbc * lcd)));
@@ -113,8 +114,10 @@ void Leg::setPosition(Eigen::Vector3f pos, Plane& refPlane) {
 	_servo[1]->setAngle(delta - theta);
 }
 
-Plane::Plane() : roll_(0), pitch_(0), yaw_(0), rotater_(0.f, Eigen::Vector3f(0, 0, 1)) {
+Plane::Plane()
+: roll_(0), pitch_(0), yaw_(0), rotater_(0.f, Eigen::Vector3f(0, 0, 1)), origin_(0, 0, 0), normal_(0, 0, 1) {
 	int legIdx;
+	int servoNum;
 
 	initLegOrigin_[0] << 75.0,	40.0,		0.0;
 	initLegOrigin_[1] << 0.0,	67.8838,	0.0;
@@ -130,11 +133,22 @@ Plane::Plane() : roll_(0), pitch_(0), yaw_(0), rotater_(0.f, Eigen::Vector3f(0, 
 	initLegPos_[4] <<	0.0,		-153.8388,	0.0;
 	initLegPos_[5] <<	-158.8824,	-80.4706,	0.0;
 
-	for(legIdx = 0; legIdx < 3; legIdx++) {
-		leg_[legIdx] = new Leg(left, initLegOrigin_[legIdx], initLegPos_[legIdx]);
+	//left side
+	for(servoNum = 21, legIdx = 0; legIdx < 3; legIdx++, servoNum += 3) {
+		std::vector<int> servoVec;
+		servoVec.push_back(servoNum);
+		servoVec.push_back(servoNum + 1);
+		servoVec.push_back(servoNum + 2);
+		leg_[legIdx] = new Leg(left, initLegOrigin_[legIdx], initLegPos_[legIdx], servoVec);
 	}
-	for(; legIdx < 6; legIdx++) {
-		leg_[legIdx] = new Leg(right, initLegOrigin_[legIdx], initLegPos_[legIdx]);
+
+	//right side
+	for(servoNum = 12; legIdx < 6; legIdx++, servoNum -= 3) {
+		std::vector<int> servoVec;
+		servoVec.push_back(servoNum);
+		servoVec.push_back(servoNum - 1);
+		servoVec.push_back(servoNum - 2);
+		leg_[legIdx] = new Leg(right, initLegOrigin_[legIdx], initLegPos_[legIdx], servoVec);
 	}
 }
 
@@ -164,18 +178,22 @@ void Plane::rotate(float roll, float pitch, float yaw) {
 	norm = yM * norm;
 
 	this->rotate(norm);
-
-	for(int legIdx = 0; legIdx < 6; legIdx++) {
-		leg_[legIdx]->setPosition(leg_[legIdx]->_pos, *this);
-	}
 }
 
 void Plane::rotate(Eigen::Vector3f newNormal) {
 	Eigen::Vector3f initNormal(0, 0, 1);
+	float rotateAngle;
 	newNormal.normalize();
 	Eigen::Vector3f rotate = initNormal.cross(newNormal);
-	float rotateAngle = acos(initNormal.dot(newNormal));
+	if(initNormal == newNormal)
+		rotateAngle = 0.f;
+	else
+		rotateAngle = acos(initNormal.dot(newNormal));
+	normal_ = newNormal;
 	rotater_ = Eigen::AngleAxisf(rotateAngle, rotate);
+	for(int legIdx = 0; legIdx < 6; legIdx++) {
+		leg_[legIdx]->setPosition(leg_[legIdx]->_pos, *this);
+	}
 }
 
 Eigen::Vector3f Plane::projection(Eigen::Vector3f point) {
@@ -183,4 +201,23 @@ Eigen::Vector3f Plane::projection(Eigen::Vector3f point) {
 	float lProj = op.dot(normal_);
 	result = point - lProj * normal_;
 	return result;
+}
+
+void Plane::writeSerial(Serial& serial) {
+	int legIdx, servoIdx;
+	std::stringstream ss;
+	for(legIdx = 0; legIdx < 6; legIdx++) {
+		for(servoIdx = 0; servoIdx < 3; servoIdx++) {
+			if(leg_[legIdx]->_servo[servoIdx]->_changed) {
+				ss << "#" << leg_[legIdx]->_servo[servoIdx]->_number <<
+					  "P" << leg_[legIdx]->_servo[servoIdx]->_curPW <<
+					  "T" << leg_[legIdx]->_servo[servoIdx]->_speed;
+			}
+		}
+	}
+//	std::cout << ss.str() << std::endl;
+	if(ss.str().size() != 0) {
+		ss << "\r\n";
+		serial.write(ss.str().c_str(), ss.str().size());
+	}
 }
