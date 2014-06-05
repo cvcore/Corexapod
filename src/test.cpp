@@ -17,8 +17,8 @@ int main() {
 		p1.rotate(Eigen::Vector3f(0, 0, 1));
 		p1.writeSerial(uart);
 	}
-	catch (std::string eObj) {
-		std::cout << eObj << "\n";
+	catch ( ... ) {
+		std::cout << "error" << "\n";
 	}
 	return 0;
 }
