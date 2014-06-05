@@ -18,7 +18,7 @@ int main() {
 		p1.writeSerial(uart);
 	}
 	catch (std::string eObj) {
-		std::cerr << eObj << "\n";
+		std::cout << eObj << "\n";
 	}
 	return 0;
 }
