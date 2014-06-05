@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <termios.h>
+#include <stdio.h>
 
 #include <string>
 #include <iostream>

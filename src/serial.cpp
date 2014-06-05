@@ -58,16 +58,15 @@ Serial::~Serial() {
 		throw std::string("Cannot close");
 }
 
-//TODO: extend this member function
 int Serial::read(char *buffer, int size) {
-	return ::read(_filestream, (void *)buffer, (size_t)size);
+	return ::read(_filestream, buffer, size);
 }
 
 int Serial::write(const char *buffer, int size) {
 	int idx;
 	for(idx = 0; idx < size; idx++)
 		std::cout << static_cast<char>(buffer[idx]);
-	return ::write(_filestream, (const void *)buffer, (size_t)size);
+	return ::write(_filestream, buffer, size);
 }
 
 

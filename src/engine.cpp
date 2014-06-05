@@ -85,10 +85,10 @@ void Leg::setPosition(Eigen::Vector3f pos, Plane& refPlane) {
 		_servo[2]->setAngle(beta - alpha);
 
 	Eigen::Vector3f ob = _initOrigin.cross(initNormal),
-					obOffsetZ,
+					obOffset,
 					bb,
 					bd;
-	obOffsetZ << 0, 0, -29.0 + initHeight;
+	obOffset << 0, 0, refPlane.origin_(3) - 29.f;
 	float lbd, lbd2, theta, delta;
 	const float lbc2 = leg2Len * leg2Len,
 				lcd2 = leg1Len * leg1Len,
@@ -102,8 +102,8 @@ void Leg::setPosition(Eigen::Vector3f pos, Plane& refPlane) {
 	} else {
 		ob = ob * -8.f / ob.norm();
 	}
-	obOffsetZ += _initOrigin;
-	bb = ob + obOffsetZ;
+	obOffset += _initOrigin;
+	bb = ob + obOffset;
 	bb = refPlane.rotater_ * bb;
 	bd = pos - bb;
 	lbd = bd.norm();
@@ -115,7 +115,7 @@ void Leg::setPosition(Eigen::Vector3f pos, Plane& refPlane) {
 }
 
 Plane::Plane()
-: roll_(0), pitch_(0), yaw_(0), rotater_(0.f, Eigen::Vector3f(0, 0, 1)), origin_(0, 0, 0), normal_(0, 0, 1) {
+: roll_(0), pitch_(0), yaw_(0), rotater_(0.f, Eigen::Vector3f(0, 0, 1)), origin_(0, 0, initHeight), normal_(0, 0, 1) {
 	int legIdx;
 	int servoNum;
 
