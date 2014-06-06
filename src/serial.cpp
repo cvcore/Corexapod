@@ -6,6 +6,7 @@
  */
 
 #include "serial.h"
+#define TEST
 
 using namespace hex;
 
@@ -28,6 +29,7 @@ Serial::Serial(const char* path) {
 	//
 	//	O_NOCTTY - When set and path identifies a terminal device, open() shall not cause the terminal device to become the controlling terminal for the process.
 
+#ifndef TEST
 	_filestream = open(path, O_RDWR | O_NOCTTY | O_NDELAY);
 	if(_filestream == -1) {
 		throw std::string("Cannot open uart port!");
@@ -51,6 +53,7 @@ Serial::Serial(const char* path) {
 	_options.c_lflag = 0;
 	tcflush(_filestream, TCIFLUSH);
 	tcsetattr(_filestream, TCSANOW, &_options);
+#endif
 }
 
 Serial::~Serial() {

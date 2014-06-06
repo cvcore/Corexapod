@@ -48,7 +48,8 @@ public:
 
 private:
 	Servo* _servo[3];
-	Eigen::Vector3f _origin, _pos, _initOrigin;
+	Eigen::Vector3f _origin, _initOrigin, //related to plane origin
+					_pos; //absolute
 	SideType _side;
 };
 

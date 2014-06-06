@@ -23,7 +23,7 @@ Servo::Servo(int jointType, SideType side, int number) {
 	if(side == left) {
 		if(jointType % 3 == 2) {
 			_minPW = 1500;
-			_maxPW = -3500;
+			_maxPW = -500;
 			_angle = 0.f;
 		} else {
 			_minPW = 2500;
@@ -33,7 +33,7 @@ Servo::Servo(int jointType, SideType side, int number) {
 	} else if(side == right) {
 		if(jointType % 3 == 2) {
 			_minPW = 1500;
-			_maxPW = -3500;
+			_maxPW = -500;
 			_angle = 0.f;
 		} else {
 			_minPW = 500;
@@ -70,7 +70,7 @@ Leg::~Leg() {
 void Leg::setPosition(Eigen::Vector3f pos, Plane& refPlane) {
 	_pos = pos;
 	Eigen::Vector3f pp = refPlane.projection(pos),
-					ol = _origin - refPlane.origin_,
+					ol = _origin,
 					lp = pp - _origin,
 					olp =  ol.cross(lp);
 	Eigen::Vector3f initNormal(0, 0, 1);
@@ -139,6 +139,7 @@ Plane::Plane()
 		servoVec.push_back(servoNum);
 		servoVec.push_back(servoNum + 1);
 		servoVec.push_back(servoNum + 2);
+		//initLegOrigin is related to origin_
 		leg_[legIdx] = new Leg(left, initLegOrigin_[legIdx], initLegPos_[legIdx], servoVec);
 	}
 
@@ -212,6 +213,7 @@ void Plane::writeSerial(Serial& serial) {
 				ss << "#" << leg_[legIdx]->_servo[servoIdx]->_number <<
 					  "P" << leg_[legIdx]->_servo[servoIdx]->_curPW <<
 					  "T" << leg_[legIdx]->_servo[servoIdx]->_speed;
+				leg_[legIdx]->_servo[servoIdx]->_changed = false;
 			}
 		}
 	}
