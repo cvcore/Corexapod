@@ -71,7 +71,7 @@ void Leg::setPosition(Eigen::Vector3f pos, Plane& refPlane) {
 	_pos = pos;
 	Eigen::Vector3f pp = refPlane.projection(pos),
 					ol = _origin,
-					lp = pp - _origin,
+					lp = pp - (_origin + refPlane.origin_),
 					olp =  ol.cross(lp);
 	Eigen::Vector3f initNormal(0, 0, 1);
 	float alpha = asin(8.0f / lp.norm()),

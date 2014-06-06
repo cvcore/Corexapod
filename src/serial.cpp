@@ -9,6 +9,8 @@
 
 using namespace hex;
 
+//#define TEST
+
 Serial::Serial(const char* path) {
 	//-------------------------
 	//----- SETUP USART 0 -----
