@@ -15,16 +15,15 @@ int main() {
 	hex::Plane p1;
 	std::string eMsg;
 	try {
-		Eigen::Vector3f norm;
+		Eigen::Vector3f norm(1, 0, 5);
 		float x, y, z;
 		Eigen::AngleAxisf rot(3.14f / 30.f, Eigen::Vector3f(0, 0, 1));
 		hex::Serial uart("/dev/ttyAMA0");
 		while(true) {
-			std::cin >> x >> y >> z;
-			norm = Eigen::Vector3f(x, y, z);
 			p1.rotate(norm);
 			p1.writeSerial(uart);
 			std::cin.clear();
+			norm = rot * norm;
 			usleep(200000);
 //			for(float t = 0; t < 3.14 * 2; t += 3.14 / 20) {
 //				Eigen::Vector3f pos(150.8 + 5 * cos(t), 80.4 + 5 * sin(t), 0);
