@@ -33,10 +33,10 @@ int main() {
 //				usleep(100000);
 //			}
 
-//			std::cin >> x >> y >> z;
+			std::cin >> x >> y >> z;
 			p1.translate(Eigen::Vector3f(x, y, z));
-//			p1.writeSerial(uart);
-//			usleep(200000);
+			p1.writeSerial(uart);
+			usleep(200000);
 		}
 	}
 	catch (std::string eMsg) {
