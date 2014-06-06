@@ -207,6 +207,13 @@ Eigen::Vector3f Plane::projection(Eigen::Vector3f point) {
 	return result;
 }
 
+void Plane::setOrigin(Eigen::Vector3f origin) {
+	origin_ = origin;
+	for(int legIdx = 0; legIdx < 6; legIdx++) {
+		leg_[legIdx]->setPosition(leg_[legIdx]->_pos, *this);
+	}
+}
+
 void Plane::writeSerial(Serial& serial) {
 	int legIdx, servoIdx;
 	std::stringstream ss;

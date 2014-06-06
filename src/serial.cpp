@@ -73,7 +73,7 @@ int Serial::write(const char *buffer, int size) {
 	return ::write(_filestream, buffer, size);
 }
 
-
+//TODO: use this method
 bool Serial::idle() {
 	return true;
 }

@@ -59,6 +59,7 @@ public:
 	~Plane();
 	void rotate(float roll, float pitch, float yaw);
 	void rotate(Eigen::Vector3f newNormal);
+	void setOrigin(Eigen::Vector3f origin);
 	void writeSerial(Serial& serial);
 //	void rotate(Eigen::Quaternion q);
 	Eigen::Vector3f projection(Eigen::Vector3f point);
