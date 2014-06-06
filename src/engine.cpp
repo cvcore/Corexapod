@@ -204,7 +204,7 @@ void Plane::rotate(Eigen::Vector3f newNormal) {
 	normal_ = newNormal;
 	rotater_ = Eigen::AngleAxisf(rotateAngle, rotate);
 	for(int legIdx = 0; legIdx < 6; legIdx++) {
-		leg_[legIdx]->setPosition(leg_[legIdx]->_pos);
+		leg_[legIdx]->setOrigin((Eigen::Vector3f)(rotater_ * leg_[legIdx]->_origin));
 	}
 }
 
@@ -215,7 +215,7 @@ Eigen::Vector3f Plane::projection(Eigen::Vector3f point) const {
 	return result;
 }
 
-void Plane::setOrigin(Eigen::Vector3f origin) {
+void Plane::translate(Eigen::Vector3f origin) {
 	origin_ = origin;
 	for(int legIdx = 0; legIdx < 6; legIdx++) {
 		leg_[legIdx]->setPosition(leg_[legIdx]->_pos);
