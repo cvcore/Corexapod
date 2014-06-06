@@ -26,17 +26,17 @@ int main() {
 //			norm = rot * norm;
 //			usleep(200000);
 
-//			for(float t = 0; t < 3.14 * 2; t += 3.14 / 20) {
-//				Eigen::Vector3f pos(150.8 + 50 * cos(t), 80.4, 50 * sin(t));
-//				p1.leg_[0]->setPosition(pos, p1);
-//				p1.writeSerial(uart);
-//				usleep(100000);
-//			}
+			for(float t = 0; t < 3.14 * 2; t += 3.14 / 20) {
+				Eigen::Vector3f pos(150.8 + 50 * cos(t), 80.4, 50 * sin(t));
+				p1.leg_[0]->setPosition(pos);
+				p1.writeSerial(uart);
+				usleep(100000);
+			}
 
-			std::cin >> x >> y >> z;
-			p1.setOrigin(Eigen::Vector3f(x, y, z));
-			p1.writeSerial(uart);
-			usleep(200000);
+//			std::cin >> x >> y >> z;
+//			p1.setOrigin(Eigen::Vector3f(x, y, z));
+//			p1.writeSerial(uart);
+//			usleep(200000);
 		}
 	}
 	catch (std::string eMsg) {
