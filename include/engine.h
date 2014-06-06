@@ -41,9 +41,10 @@ private:
 
 class Leg {
 public:
-	Leg(SideType side, const Eigen::Vector3f& origin, const Eigen::Vector3f& pos, const std::vector<int>& servoNumber);
+	Leg(SideType side, const Eigen::Vector3f& origin, const Eigen::Vector3f& pos, const std::vector<int>& servoNumberVec, const Plane& refPlane);
 	~Leg();
-	void setPosition(Eigen::Vector3f pos, Plane& refPlane);
+	void setPosition(Eigen::Vector3f pos);
+	void setOrigin(Eigen::Vector3f newOrigin);
 	friend class Plane;
 
 private:
@@ -51,6 +52,7 @@ private:
 	Eigen::Vector3f _origin, _initOrigin, //related to plane origin
 					_pos; //absolute
 	SideType _side;
+	const Plane& _refPlane;
 };
 
 class Plane {
@@ -62,7 +64,7 @@ public:
 	void setOrigin(Eigen::Vector3f origin);
 	void writeSerial(Serial& serial);
 //	void rotate(Eigen::Quaternion q);
-	Eigen::Vector3f projection(Eigen::Vector3f point);
+	Eigen::Vector3f projection(Eigen::Vector3f point) const;
 
 	Leg* leg_[6];
 	Eigen::Vector3f origin_, normal_;

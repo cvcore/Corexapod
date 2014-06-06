@@ -54,11 +54,11 @@ void Servo::setAngle(float angle) {
 		_changed = true;
 }
 
-Leg::Leg(SideType side, const Eigen::Vector3f& origin, const Eigen::Vector3f& pos, const std::vector<int>& servoNumber)
-: _origin(origin), _initOrigin(origin), _pos(pos), _side(side) {
+Leg::Leg(SideType side, const Eigen::Vector3f& origin, const Eigen::Vector3f& pos, const std::vector<int>& servoNumberVec, const Plane& refPlane)
+: _origin(origin), _initOrigin(origin), _pos(pos), _side(side), _refPlane(refPlane) {
 	int sIdx;
 	for(sIdx = 0; sIdx < 3; sIdx++) {
-		_servo[sIdx] = new Servo(sIdx, side, servoNumber[sIdx]);
+		_servo[sIdx] = new Servo(sIdx, side, servoNumberVec[sIdx]);
 	}
 }
 
@@ -68,16 +68,16 @@ Leg::~Leg() {
 	}
 }
 
-void Leg::setPosition(Eigen::Vector3f pos, Plane& refPlane) {
+void Leg::setPosition(Eigen::Vector3f pos) {
 	_pos = pos;
-	Eigen::Vector3f pp = refPlane.projection(pos),
+	Eigen::Vector3f pp = _refPlane.projection(pos),
 					ol = _origin,
-					lp = pp - (_origin + refPlane.origin_),
+					lp = pp - (_origin + _refPlane.origin_),
 					olp =  ol.cross(lp);
 	Eigen::Vector3f initNormal(0, 0, 1);
 	float alpha = asin(8.0f / lp.norm()),
 		  beta = acos(ol.dot(lp) / (ol.norm() * lp.norm()));
-	if(olp.dot(refPlane.normal_) < 0) {
+	if(olp.dot(_refPlane.normal_) < 0) {
 		beta = -beta;
 	}
 	if(_side == left)
@@ -85,34 +85,42 @@ void Leg::setPosition(Eigen::Vector3f pos, Plane& refPlane) {
 	else
 		_servo[2]->setAngle(beta - alpha);
 
-	Eigen::Vector3f ob = _initOrigin.cross(initNormal),
+	Eigen::Vector3f ob = _origin.cross(_refPlane.normal_),
+//					ob = _initOrigin.cross(initNormal),
 					obOffset,
 					bb,
 					bd;
-	obOffset << 0, 0, refPlane.origin_(2) - 29.f;
+//	obOffset << 0, 0, refPlane.origin_(2) - 29.f;
+	obOffset = _refPlane.origin_ + Eigen::Vector3f(0, 0, -29.0);
 	float lbd, lbd2, theta, delta;
 	const float lbc2 = leg2Len * leg2Len,
 				lcd2 = leg1Len * leg1Len,
 				lbc  = leg2Len,
 				lcd  = leg1Len;
 
-	Eigen::AngleAxisf yaw(_servo[2]->_angle, Eigen::Vector3f(0, 0, 1));//TODO: monitor this
+//	Eigen::AngleAxisf yaw(_servo[2]->_angle, Eigen::Vector3f(0, 0, 1));
+	Eigen::AngleAxisf yaw(_servo[2]->_angle, _refPlane.origin_);
 	ob = yaw * ob;
 	if(_side == left) {
 		ob = ob * 8.f / ob.norm();
 	} else {
 		ob = ob * -8.f / ob.norm();
 	}
-	obOffset += _initOrigin;
+//	obOffset += _initOrigin;
 	bb = ob + obOffset;
-	bb = refPlane.rotater_ * bb;
+//	bb = refPlane.rotater_ * bb;
 	bd = pos - bb;
 	lbd = bd.norm();
 	lbd2 = bd.squaredNorm();
 	_servo[0]->setAngle(acos((lbc2 + lcd2 - lbd2) / (2 * lbc * lcd)));
 	theta = acos((lbc2 + lbd2 - lcd2) / (2 * lbc * lbd));
-	delta = acos(bd.dot(refPlane.normal_) / bd.norm());
+	delta = acos(bd.dot(_refPlane.normal_) / bd.norm());
 	_servo[1]->setAngle(delta - theta);
+}
+
+void Leg::setOrigin(Eigen::Vector3f newOrigin) {
+	_origin = newOrigin;
+	this->setPosition(_pos);
 }
 
 Plane::Plane()
@@ -141,7 +149,7 @@ Plane::Plane()
 		servoVec.push_back(servoNum + 1);
 		servoVec.push_back(servoNum + 2);
 		//initLegOrigin is related to origin_
-		leg_[legIdx] = new Leg(left, initLegOrigin_[legIdx], initLegPos_[legIdx], servoVec);
+		leg_[legIdx] = new Leg(left, initLegOrigin_[legIdx], initLegPos_[legIdx], servoVec, *this);
 	}
 
 	//right side
@@ -150,7 +158,7 @@ Plane::Plane()
 		servoVec.push_back(servoNum);
 		servoVec.push_back(servoNum - 1);
 		servoVec.push_back(servoNum - 2);
-		leg_[legIdx] = new Leg(right, initLegOrigin_[legIdx], initLegPos_[legIdx], servoVec);
+		leg_[legIdx] = new Leg(right, initLegOrigin_[legIdx], initLegPos_[legIdx], servoVec, *this);
 	}
 }
 
@@ -196,11 +204,11 @@ void Plane::rotate(Eigen::Vector3f newNormal) {
 	normal_ = newNormal;
 	rotater_ = Eigen::AngleAxisf(rotateAngle, rotate);
 	for(int legIdx = 0; legIdx < 6; legIdx++) {
-		leg_[legIdx]->setPosition(leg_[legIdx]->_pos, *this);
+		leg_[legIdx]->setPosition(leg_[legIdx]->_pos);
 	}
 }
 
-Eigen::Vector3f Plane::projection(Eigen::Vector3f point) {
+Eigen::Vector3f Plane::projection(Eigen::Vector3f point) const {
 	Eigen::Vector3f op = point - origin_, result;
 	float lProj = op.dot(normal_);
 	result = point - lProj * normal_;
@@ -210,7 +218,7 @@ Eigen::Vector3f Plane::projection(Eigen::Vector3f point) {
 void Plane::setOrigin(Eigen::Vector3f origin) {
 	origin_ = origin;
 	for(int legIdx = 0; legIdx < 6; legIdx++) {
-		leg_[legIdx]->setPosition(leg_[legIdx]->_pos, *this);
+		leg_[legIdx]->setPosition(leg_[legIdx]->_pos);
 	}
 }
 
