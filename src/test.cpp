@@ -26,7 +26,7 @@ int main() {
 //			norm = rot * norm;
 //			usleep(200000);
 			for(float t = 0; t < 3.14 * 2; t += 3.14 / 20) {
-				Eigen::Vector3f pos(150.8 + 50 * cos(t), 80.4 + 50 * sin(t), 0);
+				Eigen::Vector3f pos(150.8 + 50 * cos(t), 80.4, 50 * sin(t));
 				p1.leg_[0]->setPosition(pos, p1);
 				p1.writeSerial(uart);
 				usleep(200000);

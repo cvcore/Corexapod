@@ -20,6 +20,7 @@ Servo::Servo(int jointType, SideType side, int number) {
 	_curPW = 1500;
 	_changed = true;
 	_number = number;
+	//TODO: Add a self calibration method.
 	if(side == left) {
 		if(jointType % 3 == 2) {
 			_minPW = 1500;
