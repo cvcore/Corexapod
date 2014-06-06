@@ -6,7 +6,6 @@
  */
 
 #include "serial.h"
-#define TEST
 
 using namespace hex;
 

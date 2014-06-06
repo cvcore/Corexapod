@@ -26,7 +26,7 @@ int main() {
 //			p1.writeSerial(uart);
 //			std::cin.clear();
 			for(float t = 0; t < 3.14 * 2; t += 3.14 / 20) {
-				Eigen::Vector3f pos(75 + 5 * cos(t), 40 + 5 * sin(t), 0);
+				Eigen::Vector3f pos(150.8 + 5 * cos(t), 80.4 + 5 * sin(t), 0);
 				p1.leg_[0]->setPosition(pos, p1);
 				p1.writeSerial(uart);
 				usleep(200000);
