@@ -23,7 +23,7 @@ Servo::Servo(int jointType, SideType side, int number) {
 	if(side == left) {
 		if(jointType % 3 == 2) {
 			_minPW = 1500;
-			_maxPW = -500;
+			_maxPW = 500;
 			_angle = 0.f;
 		} else {
 			_minPW = 2500;
@@ -33,7 +33,7 @@ Servo::Servo(int jointType, SideType side, int number) {
 	} else if(side == right) {
 		if(jointType % 3 == 2) {
 			_minPW = 1500;
-			_maxPW = -500;
+			_maxPW = 500;
 			_angle = 0.f;
 		} else {
 			_minPW = 500;
@@ -182,14 +182,16 @@ void Plane::rotate(float roll, float pitch, float yaw) {
 }
 
 void Plane::rotate(Eigen::Vector3f newNormal) {
-	Eigen::Vector3f initNormal(0, 0, 1);
+	Eigen::Vector3f initNormal(0, 0, 1), rotate;
 	float rotateAngle;
 	newNormal.normalize();
-	Eigen::Vector3f rotate = initNormal.cross(newNormal);
-	if(initNormal == newNormal)
+	if(initNormal == newNormal) {
 		rotateAngle = 0.f;
-	else
+		rotate = initNormal;
+	} else {
+		rotate = initNormal.cross(newNormal);
 		rotateAngle = acos(initNormal.dot(newNormal));
+	}
 	normal_ = newNormal;
 	rotater_ = Eigen::AngleAxisf(rotateAngle, rotate);
 	for(int legIdx = 0; legIdx < 6; legIdx++) {
