@@ -48,7 +48,7 @@ Serial::Serial(const char* path) {
 	//	PARENB - Parity enable
 	//	PARODD - Odd parity (else even)
 	tcgetattr(_filestream, &_options);
-	_options.c_cflag = B9600 | CS8 | CLOCAL | CREAD;		//<Set baud rate
+	_options.c_cflag = B38400 | CS8 | CLOCAL | CREAD;		//<Set baud rate
 	_options.c_iflag = IGNPAR;
 	_options.c_oflag = 0;
 	_options.c_lflag = 0;
