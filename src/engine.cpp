@@ -74,7 +74,7 @@ void Leg::setPosition(Eigen::Vector3f pos) {
 					ol = _origin,
 					lp = pp - (_origin + _refPlane.origin_),
 					olp =  ol.cross(lp);
-	Eigen::Vector3f initNormal(0, 0, 1);
+	Eigen::Vector3f initNormal(Eigen::Vector3f::UnitZ());
 	float alpha = asin(8.0f / lp.norm()),
 		  beta = acos(ol.dot(lp) / (ol.norm() * lp.norm()));
 	if(olp.dot(_refPlane.normal_) < 0) {
@@ -125,7 +125,7 @@ void Leg::setOrigin(Eigen::Vector3f newOrigin) {
 }
 
 Plane::Plane()
-: roll_(0), pitch_(0), yaw_(0), rotater_(0.f, Eigen::Vector3f(0, 0, 1)), origin_(0, 0, initHeight), normal_(0, 0, 1) {
+: roll_(0), pitch_(0), yaw_(0), rotater_(0.f, Eigen::Vector3f::UnitZ()), origin_(0, 0, initHeight), normal_(Eigen::Vector3f::UnitZ()) {
 	int legIdx;
 	int servoNum;
 
@@ -170,7 +170,7 @@ Plane::~Plane() {
 }
 
 void Plane::rotate(float roll, float pitch, float yaw) {
-	Eigen::Vector3f norm(0, 0, 1);
+	Eigen::Vector3f norm(Eigen::Vector3f::UnitZ());
 	Eigen::Matrix3f rM, pM, yM;
 	rM <<	0				, 0				, 0				,
 			0				, cos(roll)		, -sin(roll)	,
@@ -192,7 +192,7 @@ void Plane::rotate(float roll, float pitch, float yaw) {
 }
 
 void Plane::rotate(Eigen::Vector3f newNormal) {
-	Eigen::Vector3f initNormal(0, 0, 1), rotate;
+	Eigen::Vector3f initNormal(Eigen::Vector3f::UnitZ()), rotate;
 	float rotateAngle;
 	newNormal.normalize();
 	if(initNormal == newNormal) {
