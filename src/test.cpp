@@ -24,7 +24,7 @@ int main() {
 			p1.writeSerial(uart);
 			std::cin.clear();
 			norm = rot * norm;
-			usleep(200000);
+			usleep(250000);
 
 //			for(float t = 0; t < 3.14 * 2; t += 3.14 / 20) {
 //				Eigen::Vector3f pos(150.8 + 50 * cos(t), 80.4 + 50 * sin(t), 0);
