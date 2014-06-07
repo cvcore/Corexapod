@@ -200,6 +200,7 @@ void Plane::rotate(Eigen::Vector3f newNormal) {
 		rotate = initNormal;
 	} else {
 		rotate = initNormal.cross(newNormal);
+		rotate.normalize();
 		rotateAngle = acos(initNormal.dot(newNormal));
 	}
 	normal_ = newNormal;
