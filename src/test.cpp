@@ -15,7 +15,7 @@ int main() {
 	hex::Plane p1;
 	std::string eMsg;
 	try {
-		Eigen::Vector3f norm(1, 0, 3);
+		Eigen::Vector3f norm(1, 0, 4);
 		float x, y, z;
 		Eigen::AngleAxisf rot(3.14f / 30.f, Eigen::Vector3f(0, 0, 1));
 		hex::Serial uart("/dev/ttyAMA0");
