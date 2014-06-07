@@ -49,7 +49,7 @@ Servo::Servo(int jointType, SideType side, int number) {
 void Servo::setAngle(float angle) {
 	int lastPW = _curPW;
 	_angle = angle;
-	_curPW = (float)(_maxPW - _minPW) * _angle / PI + _minPW;
+	_curPW = (_maxPW - _minPW) * _angle / PI + _minPW;
 	if(lastPW != _curPW)
 		_changed = true;
 }
