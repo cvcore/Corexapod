@@ -33,6 +33,12 @@ int main() {
 //				usleep(200000);
 //			}
 
+			for(float t = 0; t < 3.14 * 2; t += 3.14 / 20) {
+				p1.translate(Eigen::Vector3f(50 * cos(t), 50 * sin(t), 169));
+				p1.writeSerial(uart);
+				usleep(200000);
+			}
+
 //			std::cin >> x >> y >> z;
 //			p1.translate(Eigen::Vector3f(x, y, z));
 //			p1.writeSerial(uart);
