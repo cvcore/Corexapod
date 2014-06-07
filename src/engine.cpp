@@ -90,9 +90,9 @@ void Leg::setPosition(Eigen::Vector3f pos) {
 					obOffset,
 					bb,
 					bd;
-	obOffset << 0, 0, _refPlane.origin_(2) - 29.f;
+//	obOffset << 0, 0, _refPlane.origin_(2) - 29.f;
 //	obOffset = _refPlane.origin_ + _origin + Eigen::Vector3f(0, 0, -29.0);
-//	obOffset = _refPlane.origin_ + _origin + _refPlane.normal_ * (-29.0) / _refPlane.normal_.norm();
+	obOffset = _refPlane.origin_ + _origin + _refPlane.normal_ * (-29.0) / _refPlane.normal_.norm();
 	float lbd, lbd2, theta, delta;
 	const float lbc2 = leg2Len * leg2Len,
 				lcd2 = leg1Len * leg1Len,
@@ -100,14 +100,14 @@ void Leg::setPosition(Eigen::Vector3f pos) {
 				lcd  = leg1Len;
 
 //	Eigen::AngleAxisf yaw(_servo[2]->_angle, Eigen::Vector3f(0, 0, 1));
-	Eigen::AngleAxisf yaw(_servo[2]->_angle, _refPlane.origin_);
+	Eigen::AngleAxisf yaw(_servo[2]->_angle, _refPlane.normal_);
 	ob = yaw * ob;
 	if(_side == left) {
 		ob = ob * 8.f / ob.norm();
 	} else {
 		ob = ob * -8.f / ob.norm();
 	}
-	obOffset += _initOrigin;
+//	obOffset += _initOrigin;
 	bb = ob + obOffset;
 //	bb = refPlane.rotater_ * bb;
 	bd = pos - bb;
