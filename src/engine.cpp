@@ -77,9 +77,9 @@ void Leg::setPosition(Eigen::Vector3f pos) {
 	Eigen::Vector3f initNormal(0, 0, 1);
 	float alpha = asin(8.0f / lp.norm()),
 		  beta = acos(ol.dot(lp) / (ol.norm() * lp.norm()));
-	if(olp.dot(_refPlane.normal_) < 0) {
-		beta = -beta;
-	}
+//	if(olp.dot(_refPlane.normal_) < 0) {
+//		beta = -beta;
+//	}
 	if(_side == left)
 		_servo[2]->setAngle(alpha - beta);
 	else

@@ -9,7 +9,7 @@
 
 using namespace hex;
 
-#define TEST
+//#define TEST
 
 Serial::Serial(const char* path) {
 	//-------------------------
