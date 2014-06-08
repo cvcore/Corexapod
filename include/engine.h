@@ -60,12 +60,11 @@ public:
 	Plane();
 	~Plane();
 	void rotate(float roll, float pitch, float yaw);
-	void rotate(Eigen::Vector3f newNormal);
-	void rotate(Eigen::Quaternionf q);
+	void rotate(Eigen::Vector3f newNormal, float angle = 0);
 	void translate(Eigen::Vector3f origin);
 	void writeSerial(Serial& serial);
-//	void rotate(Eigen::Quaternion q);
 	Eigen::Vector3f projection(Eigen::Vector3f point) const;
+	void calibrate();
 
 	Leg* leg_[6];
 	Eigen::Vector3f origin_, normal_;

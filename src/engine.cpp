@@ -191,7 +191,7 @@ void Plane::rotate(float roll, float pitch, float yaw) {
 	this->rotate(norm);
 }
 
-void Plane::rotate(Eigen::Vector3f newNormal) {
+void Plane::rotate(Eigen::Vector3f newNormal, float angle) {
 	Eigen::Vector3f initNormal(Eigen::Vector3f::UnitZ()), rotate;
 	float rotateAngle;
 	newNormal.normalize();
@@ -204,9 +204,10 @@ void Plane::rotate(Eigen::Vector3f newNormal) {
 		rotateAngle = acos(initNormal.dot(newNormal));
 	}
 	normal_ = newNormal;
+	Eigen::AngleAxisf rotater0(angle, newNormal);
 	rotater_ = Eigen::AngleAxisf(rotateAngle, rotate);
 	for(int legIdx = 0; legIdx < 6; legIdx++) {
-		leg_[legIdx]->setOrigin((Eigen::Vector3f)(rotater_ * leg_[legIdx]->_initOrigin));
+		leg_[legIdx]->setOrigin((Eigen::Vector3f)(rotater0 * rotater_ * leg_[legIdx]->_initOrigin));
 	}
 }
 
