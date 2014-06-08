@@ -204,7 +204,7 @@ void Plane::rotate(Eigen::Vector3f newNormal, float angle) {
 		rotateAngle = acos(initNormal.dot(newNormal));
 	}
 	normal_ = newNormal;
-	Eigen::AngleAxisf rotater0(angle, newNormal);
+	Eigen::AngleAxisf rotater0(angle, initNormal);
 	rotater_ = Eigen::AngleAxisf(rotateAngle, rotate);
 	for(int legIdx = 0; legIdx < 6; legIdx++) {
 		leg_[legIdx]->setOrigin((Eigen::Vector3f)(rotater_ * (rotater0 * leg_[legIdx]->_initOrigin)));
