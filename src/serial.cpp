@@ -12,6 +12,7 @@ using namespace hex;
 //#define TEST
 
 Serial::Serial(const char* path) {
+#ifndef TEST
 	//-------------------------
 	//----- SETUP USART 0 -----
 	//-------------------------
@@ -29,8 +30,6 @@ Serial::Serial(const char* path) {
 	//											immediately with a failure status if the output can't be written immediately.
 	//
 	//	O_NOCTTY - When set and path identifies a terminal device, open() shall not cause the terminal device to become the controlling terminal for the process.
-
-#ifndef TEST
 	_filestream = open(path, O_RDWR | O_NOCTTY | O_NDELAY);
 	if(_filestream == -1) {
 		throw std::string("Cannot open uart port!");
@@ -62,6 +61,7 @@ Serial::~Serial() {
 		throw std::string("Cannot close");
 }
 
+//TODO: this method cannot read data properly
 int Serial::read(char *buffer, int size) {
 	return ::read(_filestream, buffer, size);
 }
