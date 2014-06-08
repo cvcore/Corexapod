@@ -16,7 +16,7 @@ const float leg1Len = 140.801278;
 const float leg2Len = 86.0;
 
 Servo::Servo(int jointType, SideType side, int number) {
-	_actTime = 1000; //ms
+	_actTime = 200; //ms
 	_curPW = 1500;
 	_changed = true;
 	_number = number;
