@@ -36,7 +36,7 @@ int main() {
 //			}
 
 			std::cin >> s;
-			s << "\r\n";
+			s += "\r\n";
 			uart.write(s.c_str(), s.size());
 			usleep(250000);
 			std::cout << '\n' << uart.read(uartBuf, 255) << ':' << uartBuf << '\n';
