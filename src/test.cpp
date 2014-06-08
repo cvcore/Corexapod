@@ -40,7 +40,7 @@ int main() {
 //			}
 
 			std::cin >> x >> y >> z >> w;
-			p1.translate(Eigen::Vector3f(x, y, z), w);
+			p1.rotate(Eigen::Vector3f(x, y, z), w);
 			p1.writeSerial(uart);
 			usleep(200000);
 		}
