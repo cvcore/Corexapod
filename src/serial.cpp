@@ -75,7 +75,7 @@ int Serial::write(const char *buffer, int size, float blockTime) {
 		returnVal = ::write(_filedes, buffer, size);
 		_timestamp = std::clock();
 		_busy = true;
-		_blockTime = blockTime + 0.05; //add 0.05 for sure
+		_blockTime = blockTime + 0.01;
 	}
 	return returnVal;
 }
