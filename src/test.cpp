@@ -29,8 +29,8 @@ int main() {
 //			usleep(250000);
 
 			for(float t = 0; t < 3.14 * 2; t += 3.14 / 10) {
-				Eigen::Vector3f pos(150.8 + 50 * cos(t), 80.4 + 50 * sin(t), 0);
-				p1.leg_[0]->setPosition(pos);
+				Eigen::Vector3f pos(50 * cos(t), 50 * sin(t), 100);
+				p1.translate(pos);
 				p1.writeSerial(uart);
 				while(uart.busy());
 			}
