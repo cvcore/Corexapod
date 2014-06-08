@@ -21,7 +21,6 @@
 #include <string>
 #include <iostream>
 #include <cstddef>
-#include <machine/_types.h>
 
 namespace hex {
 
