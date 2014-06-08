@@ -60,7 +60,7 @@ public:
 	Plane();
 	~Plane();
 	void rotate(float roll, float pitch, float yaw);
-	void rotate(Eigen::Vector3f newNormal, float angle = 0);
+	void rotate(Eigen::Vector3f newNormal, float angle = 0.f);
 	void translate(Eigen::Vector3f origin);
 	void writeSerial(Serial& serial);
 	Eigen::Vector3f projection(Eigen::Vector3f point) const;

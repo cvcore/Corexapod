@@ -16,7 +16,7 @@ int main() {
 	std::string eMsg;
 	try {
 		Eigen::Vector3f norm(1, 0, 4);
-		float x, y, z;
+		float x, y, z, w;
 		Eigen::AngleAxisf rot(3.14f / 30.f, Eigen::Vector3f(0, 0, 1));
 		hex::Serial uart("/dev/ttyAMA0");
 		while(true) {
@@ -39,8 +39,8 @@ int main() {
 //				usleep(250000);
 //			}
 
-			std::cin >> x >> y >> z;
-			p1.translate(Eigen::Vector3f(x, y, z));
+			std::cin >> x >> y >> z >> w;
+			p1.translate(Eigen::Vector3f(x, y, z), w);
 			p1.writeSerial(uart);
 			usleep(200000);
 		}
