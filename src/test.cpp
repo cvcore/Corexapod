@@ -34,7 +34,7 @@ int main() {
 //			}
 
 			for(float t = 0; t < 3.14 * 2; t += 3.14 / 20) {
-				p1.translate(Eigen::Vector3f(30 * cos(t), 30 * sin(t), 100));
+				p1.rotate(Eigen::Vector3f(30 * cos(t), 30 * sin(t), 100));
 				p1.writeSerial(uart);
 				usleep(250000);
 			}
