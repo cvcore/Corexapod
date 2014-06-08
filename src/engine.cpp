@@ -81,7 +81,7 @@ void Leg::setPosition(Eigen::Vector3f pos) {
 		beta = -beta;
 	}
 	if(_side == left)
-		_servo[2]->setAngle(alpha - beta);
+		_servo[2]->setAngle(beta + alpha);
 	else
 		_servo[2]->setAngle(beta - alpha);
 
