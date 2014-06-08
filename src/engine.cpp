@@ -16,7 +16,7 @@ const float leg1Len = 140.801278;
 const float leg2Len = 86.0;
 
 Servo::Servo(int jointType, SideType side, int number) {
-	_speed = 100;
+	_actTime = 1000; //ms
 	_curPW = 1500;
 	_changed = true;
 	_number = number;
@@ -227,20 +227,23 @@ void Plane::translate(Eigen::Vector3f origin) {
 
 void Plane::writeSerial(Serial& serial) {
 	int legIdx, servoIdx;
+	float maxTime = 0.f;
 	std::stringstream ss;
 	for(legIdx = 0; legIdx < 6; legIdx++) {
 		for(servoIdx = 0; servoIdx < 3; servoIdx++) {
 			if(leg_[legIdx]->_servo[servoIdx]->_changed) {
+				leg_[legIdx]->_servo[servoIdx]->_changed = false;
 				ss << "#" << leg_[legIdx]->_servo[servoIdx]->_number <<
 					  "P" << leg_[legIdx]->_servo[servoIdx]->_curPW <<
-					  "T" << leg_[legIdx]->_servo[servoIdx]->_speed;
-				leg_[legIdx]->_servo[servoIdx]->_changed = false;
+					  "T" << leg_[legIdx]->_servo[servoIdx]->_actTime;
+				if(leg_[legIdx]->_servo[servoIdx]->_actTime > maxTime * 1000)
+					maxTime = (float)leg_[legIdx]->_servo[servoIdx]->_actTime / 1000.f;
 			}
 		}
 	}
 //	std::cout << ss.str() << std::endl;
 	if(ss.str().size() != 0) {
 		ss << "\r\n";
-		serial.write(ss.str().c_str(), ss.str().size());
+		serial.write(ss.str().c_str(), ss.str().size(), maxTime);
 	}
 }

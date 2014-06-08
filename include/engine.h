@@ -34,7 +34,7 @@ public:
 	friend class Leg;
 	friend class Plane;
 private:
-	int _minPW, _maxPW, _curPW, _speed, _number;
+	int _minPW, _maxPW, _curPW, _actTime, _number;
 	float _angle;
 	bool _changed;
 };

@@ -28,18 +28,12 @@ int main() {
 //			norm = rot * norm;
 //			usleep(250000);
 
-//			for(float t = 0; t < 3.14 * 2; t += 3.14 / 20) {
-//				Eigen::Vector3f pos(150.8 + 50 * cos(t), 80.4 + 50 * sin(t), 0);
-//				p1.leg_[0]->setPosition(pos);
-//				p1.writeSerial(uart);
-//				usleep(200000);
-//			}
-
-			std::cin >> s;
-			s += "\r\n";
-			uart.write(s.c_str(), s.size());
-			usleep(250000);
-			std::cout << '\n' << uart.read(uartBuf, 255) << ':' << uartBuf << '\n';
+			for(float t = 0; t < 3.14 * 2; t += 3.14 / 10) {
+				Eigen::Vector3f pos(150.8 + 50 * cos(t), 80.4 + 50 * sin(t), 0);
+				p1.leg_[0]->setPosition(pos);
+				p1.writeSerial(uart);
+				while(uart.busy());
+			}
 
 		}
 	}

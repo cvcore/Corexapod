@@ -9,7 +9,7 @@
 
 using namespace hex;
 
-//#define TEST
+#define TEST
 
 Serial::Serial(const char* path) {
 #ifndef TEST
@@ -30,8 +30,8 @@ Serial::Serial(const char* path) {
 	//											immediately with a failure status if the output can't be written immediately.
 	//
 	//	O_NOCTTY - When set and path identifies a terminal device, open() shall not cause the terminal device to become the controlling terminal for the process.
-	_filestream = open(path, O_RDWR | O_NOCTTY | O_NDELAY);
-	if(_filestream == -1) {
+	_filedes = open(path, O_RDWR | O_NOCTTY | O_NDELAY);
+	if(_filedes == -1) {
 		throw std::string("Cannot open uart port!");
 	}
 
@@ -46,34 +46,44 @@ Serial::Serial(const char* path) {
 	//	ICRNL - Map CR to NL on input (Use for ASCII comms where you want to auto correct end of line characters - don't use for bianry comms!)
 	//	PARENB - Parity enable
 	//	PARODD - Odd parity (else even)
-	tcgetattr(_filestream, &_options);
+	tcgetattr(_filedes, &_options);
 	_options.c_cflag = B9600 | CS8 | CLOCAL | CREAD;		//<Set baud rate
 	_options.c_iflag = IGNPAR;
 	_options.c_oflag = 0;
 	_options.c_lflag = 0;
-	tcflush(_filestream, TCIFLUSH);
-	tcsetattr(_filestream, TCSANOW, &_options);
+	tcflush(_filedes, TCIFLUSH);
+	tcsetattr(_filedes, TCSANOW, &_options);
 #endif
 }
 
 Serial::~Serial() {
-	if(close(_filestream) == -1)
+	if(close(_filedes) == -1)
 		throw std::string("Cannot close");
 }
 
 //TODO: this method cannot read data properly
 int Serial::read(char *buffer, int size) {
-	return ::read(_filestream, buffer, size);
+	return ::read(_filedes, buffer, size);
 }
 
-int Serial::write(const char *buffer, int size) {
-	int idx;
-	for(idx = 0; idx < size; idx++)
-		std::cout << static_cast<char>(buffer[idx]);
-	return ::write(_filestream, buffer, size);
+int Serial::write(const char *buffer, int size, float blockTime) {
+	int returnVal;
+	if(!(this->busy())) {
+		int idx;
+		for(idx = 0; idx < size; idx++)
+			std::cout << static_cast<char>(buffer[idx]);
+		returnVal = ::write(_filedes, buffer, size);
+		_timestamp = std::clock();
+		_busy = true;
+		_blockTime = blockTime + 0.05; //add 0.05 for sure
+	}
+	return returnVal;
 }
 
-//TODO: use this method
-bool Serial::idle() {
-	return true;
+bool Serial::busy() {
+	if(_busy) {
+		if((std::clock() - _timestamp) / (double)CLOCKS_PER_SEC > _blockTime)
+			_busy = false;
+	}
+	return _busy;
 }

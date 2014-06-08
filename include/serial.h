@@ -20,6 +20,7 @@
 #include <string>
 #include <iostream>
 #include <cstddef>
+#include <ctime>
 
 namespace hex {
 
@@ -27,12 +28,15 @@ class Serial {
 public:
 	Serial(const char* path);
 	~Serial();
-	int write(const char *buffer, int size);
+	int write(const char *buffer, int size, float blockTime = 0.f);
 	int read(char *buffer, int size);
-	bool idle();
+	bool busy();
 private:
-	int _filestream;
+	int _filedes;
 	struct termios _options;
+	std::clock_t _timestamp;
+	bool _busy;
+	float _blockTime;
 };
 
 }
