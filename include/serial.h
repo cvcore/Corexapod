@@ -12,7 +12,6 @@
 #include <iostream>
 #endif
 
-//FIXME naming pollution
 #include <unistd.h>
 #include <fcntl.h>
 #include <termios.h>

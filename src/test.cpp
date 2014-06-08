@@ -17,6 +17,7 @@ int main() {
 	try {
 		Eigen::Vector3f norm(1, 0, 4);
 		float x, y, z, w;
+		char uartBuf[255];
 		Eigen::AngleAxisf rot(3.14f / 30.f, Eigen::Vector3f(0, 0, 1));
 		hex::Serial uart("/dev/ttyAMA0");
 		while(true) {
@@ -33,11 +34,13 @@ int main() {
 //				usleep(200000);
 //			}
 
-			for(float t = 0; t < 3.14 * 2; t += 3.14 / 20) {
-				p1.rotate(Eigen::Vector3f(30 * cos(t), 30 * sin(t), 100));
-				p1.writeSerial(uart);
-				usleep(250000);
-			}
+			std::cin >> x >> y >> z >> w;
+			p1.rotate(Eigen::Vector3f(x, y, z), w);
+			p1.writeSerial(uart);
+			uart.read(uartBuf, 255);
+			std::cout << '\n' << '#' << uartBuf << '\n';
+
+			usleep(250000);
 
 		}
 	}
