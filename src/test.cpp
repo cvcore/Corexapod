@@ -37,10 +37,8 @@ int main() {
 			std::cin >> x >> y >> z >> w;
 			p1.rotate(Eigen::Vector3f(x, y, z), w);
 			p1.writeSerial(uart);
-			uart.read(uartBuf, 255);
-			std::cout << '\n' << '#' << uartBuf << '\n';
-
 			usleep(250000);
+			std::cout << '\n' << uart.read(uartBuf, 255) << ':' << uartBuf << '\n';
 
 		}
 	}
