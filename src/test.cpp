@@ -20,29 +20,11 @@ int main() {
 		Eigen::AngleAxisf rot(3.14f / 30.f, Eigen::Vector3f(0, 0, 1));
 		hex::Serial uart("/dev/ttyAMA0");
 		while(true) {
-//			p1.rotate(norm);
-//			p1.writeSerial(uart);
-//			std::cin.clear();
-//			norm = rot * norm;
-//			usleep(250000);
-
-//			for(float t = 0; t < 3.14 * 2; t += 3.14 / 20) {
-//				Eigen::Vector3f pos(150.8 + 50 * cos(t), 80.4 + 50 * sin(t), 0);
-//				p1.leg_[0]->setPosition(pos);
-//				p1.writeSerial(uart);
-//				usleep(200000);
-//			}
-
-//			for(float t = 0; t < 3.14 * 2; t += 3.14 / 20) {
-//				p1.translate(Eigen::Vector3f(30 * cos(t), 30 * sin(t), 100));
-//				p1.writeSerial(uart);
-//				usleep(250000);
-//			}
-
-			std::cin >> x >> y >> z >> w;
-			p1.rotate(Eigen::Vector3f(x, y, z), w);
-			p1.writeSerial(uart);
-			usleep(200000);
+			for(float w = 0; w < 3.14 / 6; w += 3.14 / 6 / 20) {
+				p1.rotate(Eigen::Vector3f::UnitZ(), w);
+				p1.writeSerial(uart);
+				usleep(200000);
+			}
 		}
 	}
 	catch (std::string eMsg) {
