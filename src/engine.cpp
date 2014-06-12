@@ -281,6 +281,19 @@ void Plane::writeSerial(Serial& serial) {
 
 }
 
+void Plane::stepGroup(const Eigen::Vector3f& dire, int stepT, const std::vector<int>& group, float height) {
+	std::vector<int>::const_iterator it = group.begin();
+	for(; it != group.end(); it++) {
+		leg_[*it]->step(dire, stepT, height);
+	}
+}
+
+void Plane::resetMovementGroup(const std::vector<int>& group) {
+	std::vector<int>::const_iterator it = group.begin();
+	for(; it != group.end(); it++)
+		leg_[*it]->resetMovement();
+}
+
 Hexapod::Hexapod() : uart_("/dev/ttyAMA0") {}
 
 void Hexapod::parseMovement() {
@@ -322,22 +335,29 @@ void Hexapod::parseMovement() {
 	}
 }
 
-void Hexapod::moveLinear(const Eigen::Vector3f& direction, int totalT) {
-	base_.leg_[0]->step(direction, totalT, 40);
-	base_.leg_[2]->step(direction, totalT, 40);
-	base_.leg_[4]->step(direction, totalT, 40);
+void Hexapod::moveLinear(const Eigen::Vector3f& direction, int stepT, int count) {
+	int nextGroup = 1;
+	const int sGroup[2][3] = {{0, 2, 4}, {1, 3, 5}};
+	std::vector<int> sGroupVec[2];
+	sGroupVec[0] = std::vector<int>(sGroup[0], sGroup[0] + 3); sGroupVec[1] = std::vector<int>(sGroup[1], sGroup[1] + 3);
+
+	base_.stepGroup(direction, stepT, sGroupVec[0], 40.f);
 	this->parseMovement();
-	base_.leg_[0]->resetMovement();
-	base_.leg_[2]->resetMovement();
-	base_.leg_[4]->resetMovement();
+	base_.resetMovementGroup(sGroupVec[0]);
 	base_.translate(base_.origin_ + direction);
 	base_.writeSerial(uart_);
 	usleep(500000);
-	base_.leg_[1]->step(direction * 2, totalT, 40);
-	base_.leg_[3]->step(direction * 2, totalT, 40);
-	base_.leg_[5]->step(direction * 2, totalT, 40);
+
+	for(; count > 0; count--, nextGroup = (nextGroup + 1) % 2) {
+		base_.stepGroup(direction * 2, stepT, sGroupVec[nextGroup], 40.f);
+		this->parseMovement();
+		base_.resetMovementGroup(sGroupVec[nextGroup]);
+		base_.translate(base_.origin_ + direction);
+		base_.writeSerial(uart_);
+		usleep(500000);
+	}
+
+	base_.stepGroup(direction, stepT, sGroupVec[nextGroup], 40.f);
 	this->parseMovement();
-	base_.leg_[1]->resetMovement();
-	base_.leg_[3]->resetMovement();
-	base_.leg_[5]->resetMovement();
+	base_.resetMovementGroup(sGroupVec[nextGroup]);
 }

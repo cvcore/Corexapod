@@ -49,7 +49,7 @@ public:
 	~Leg();
 	void setPosition(const Eigen::Vector3f& pos, int time = 500);
 	void setOrigin(const Eigen::Vector3f& newOrigin);
-	void step(const Eigen::Vector3f& dire, int totalT, float height = 10.f);
+	void step(const Eigen::Vector3f& dire, int stepT, float height = 10.f);
 	void resetMovement();
 	void addMovement(const Eigen::Vector3f& position, int deltaT); //deltaT in ms
 	Eigen::Vector3f requestPosition(int time) const; //time in ms
@@ -73,7 +73,9 @@ public:
 	void translate(const Eigen::Vector3f& origin);
 	void writeSerial(Serial& serial);
 	Eigen::Vector3f projection(const Eigen::Vector3f& point) const;
-	void calibrate();
+	void calibrate();//TODO
+	void stepGroup(const Eigen::Vector3f& dire, int stepT, const std::vector<int>& group, float height = 10.f);
+	void resetMovementGroup(const std::vector<int>& group);
 
 	Leg* leg_[6];
 	Eigen::Vector3f origin_, normal_;
@@ -86,7 +88,7 @@ class Hexapod {
 public:
 	Hexapod();
 	void parseMovement();
-	void moveLinear(const Eigen::Vector3f& direction, int totalT);
+	void moveLinear(const Eigen::Vector3f& direction, int totalT, int count = 1);
 	Plane base_;
 	Serial uart_;
 };
