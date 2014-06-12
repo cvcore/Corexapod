@@ -12,6 +12,9 @@ using namespace hex;
 //#define TEST
 
 Serial::Serial(const char* path) {
+	_blockTime = 0;
+	_timeStamp = std::clock();
+	_busy = false;
 #ifndef TEST
 	//-------------------------
 	//----- SETUP USART 0 -----
@@ -61,7 +64,7 @@ Serial::~Serial() {
 		throw std::string("Cannot close");
 }
 
-//TODO: this method cannot read data properly
+//TODO:
 int Serial::read(char *buffer, int size) {
 	return ::read(_filedes, buffer, size);
 }
@@ -73,7 +76,7 @@ int Serial::write(const char *buffer, int size, float blockTime) {
 		for(idx = 0; idx < size; idx++)
 			std::cout << static_cast<char>(buffer[idx]);
 		returnVal = ::write(_filedes, buffer, size);
-		_timestamp = std::clock();
+		_timeStamp = std::clock();
 		_busy = true;
 		_blockTime = blockTime + 0.01;
 	}
@@ -81,8 +84,9 @@ int Serial::write(const char *buffer, int size, float blockTime) {
 }
 
 bool Serial::busy() {
+	return false;
 	if(_busy) {
-		if((std::clock() - _timestamp) / (double)CLOCKS_PER_SEC > _blockTime)
+		if((std::clock() - _timeStamp) / (double)CLOCKS_PER_SEC > _blockTime)
 			_busy = false;
 	}
 	return _busy;

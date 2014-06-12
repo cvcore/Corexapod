@@ -12,10 +12,12 @@
 #include <iostream>
 #endif
 
+extern "C" {
 #include <unistd.h>
 #include <fcntl.h>
 #include <termios.h>
 #include <stdio.h>
+}
 
 #include <string>
 #include <iostream>
@@ -34,7 +36,7 @@ public:
 private:
 	int _filedes;
 	struct termios _options;
-	std::clock_t _timestamp;
+	std::clock_t _timeStamp;
 	bool _busy;
 	float _blockTime;
 };

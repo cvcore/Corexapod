@@ -13,7 +13,10 @@
 #include "Eigen/Dense"
 #include <cmath>
 #include <cassert>
+#include <limits>
 #include <vector>
+#include <list>
+#include <queue>
 #include <sstream>
 #include <iostream>
 
@@ -23,6 +26,7 @@ typedef enum { left, right } SideType;
 
 class Plane;
 class Leg;
+struct Movement;
 
 class Servo {
 public:
@@ -43,10 +47,14 @@ class Leg {
 public:
 	Leg(SideType side, const Eigen::Vector3f& origin, const Eigen::Vector3f& pos, const std::vector<int>& servoNumberVec, const Plane& refPlane);
 	~Leg();
-	void setPosition(Eigen::Vector3f pos);
-	void setOrigin(Eigen::Vector3f newOrigin);
-	friend class Plane;
+	void setPosition(const Eigen::Vector3f& pos, int time = 0);
+	void setOrigin(const Eigen::Vector3f& newOrigin);
+	void resetMovement();
+	void addMovement(const Eigen::Vector3f& position, int deltaT); //deltaT in ms
+	Eigen::Vector3f requestPosition(int time) const; //time in ms
 
+	friend class Plane;
+	std::vector<Movement> moveGroup_;
 private:
 	Servo* _servo[3];
 	Eigen::Vector3f _origin, _initOrigin, //related to plane origin
@@ -60,10 +68,10 @@ public:
 	Plane();
 	~Plane();
 	void rotate(float roll, float pitch, float yaw);
-	void rotate(Eigen::Vector3f newNormal, float angle = 0.f);
-	void translate(Eigen::Vector3f origin);
+	void rotate(const Eigen::Vector3f& newNormal, float angle = 0.f);
+	void translate(const Eigen::Vector3f& origin);
 	void writeSerial(Serial& serial);
-	Eigen::Vector3f projection(Eigen::Vector3f point) const;
+	Eigen::Vector3f projection(const Eigen::Vector3f& point) const;
 	void calibrate();
 
 	Leg* leg_[6];
@@ -71,13 +79,21 @@ public:
 	float roll_, pitch_, yaw_;
 	Eigen::Vector3f initLegOrigin_[6], initLegPos_[6];
 	Eigen::AngleAxisf rotater_;
-private:
-	Eigen::Vector3f _lastNormal;
 };
 
+class Hexapod {
+public:
+	Hexapod();
+	void parseMovement();
+	Plane base_;
+	Serial uart_;
+};
 
-
-
+struct Movement {
+	Movement(const Eigen::Vector3f& position, int deltaT) : position_(position), deltaT_(deltaT) {}
+	Eigen::Vector3f position_;
+	int deltaT_;
+};
 
 
 

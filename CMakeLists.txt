@@ -19,6 +19,10 @@ endif()
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
+set( Boost_USE_STATIC_LIBS ON ) 
+find_package(Boost 1.40 COMPONENTS thread date_time program_options filesystem system REQUIRED)
+include_directories(${BOOST_INCLUDE_DIR})
+
 #set the default path for built executables to the "bin" directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
@@ -34,3 +38,7 @@ target_link_libraries( corexapod )
 
 add_executable( test src/test.cpp )
 target_link_libraries( test corexapod )
+
+#add_executable( testboost src/testboost.cpp )
+#target_link_libraries( testboost ${Boost_LIBRARIES} )
+

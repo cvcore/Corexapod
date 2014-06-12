@@ -60,6 +60,7 @@ Leg::Leg(SideType side, const Eigen::Vector3f& origin, const Eigen::Vector3f& po
 	for(sIdx = 0; sIdx < 3; sIdx++) {
 		_servo[sIdx] = new Servo(sIdx, side, servoNumberVec[sIdx]);
 	}
+	this->resetMovement();
 }
 
 Leg::~Leg() {
@@ -68,7 +69,7 @@ Leg::~Leg() {
 	}
 }
 
-void Leg::setPosition(Eigen::Vector3f pos) {
+void Leg::setPosition(const Eigen::Vector3f& pos, int time) {
 	_pos = pos;
 	Eigen::Vector3f pp = _refPlane.projection(pos),
 					ol = _origin,
@@ -117,15 +118,39 @@ void Leg::setPosition(Eigen::Vector3f pos) {
 	theta = acos((lbc2 + lbd2 - lcd2) / (2 * lbc * lbd));
 	delta = acos(bd.dot(_refPlane.normal_) / bd.norm());
 	_servo[1]->setAngle(delta - theta);
+
+	_servo[0]->_actTime = _servo[1]->_actTime = _servo[2]->_actTime = time;
+	if(time < 50)
+		std::cout << "time interval: " << time << " too short, may cause problems\n";
 }
 
-void Leg::setOrigin(Eigen::Vector3f newOrigin) {
+void Leg::setOrigin(const Eigen::Vector3f& newOrigin) {
 	_origin = newOrigin;
 	this->setPosition(_pos);
 }
 
+void Leg::resetMovement() {
+	moveGroup_.clear();
+	moveGroup_.push_back(Movement(_pos, 0));
+}
+
+void Leg::addMovement(const Eigen::Vector3f& position, int deltaT) {
+	moveGroup_.push_back(Movement(position, deltaT));
+}
+
+Eigen::Vector3f Leg::requestPosition(int time) const {
+	std::vector<Movement>::const_iterator it = moveGroup_.begin();
+	Eigen::Vector3f lastPosition(it->position_);
+	int sumT = 0;
+	for(it++; it != moveGroup_.end() && sumT + it->deltaT_ < time; sumT += it->deltaT_, lastPosition = it->position_, it++);
+	if(it == moveGroup_.end())
+		return lastPosition;
+	else
+		return (lastPosition + (it->position_ - lastPosition) * (float)(time - sumT) / it->deltaT_);
+}
+
 Plane::Plane()
-: roll_(0), pitch_(0), yaw_(0), rotater_(0.f, Eigen::Vector3f::UnitZ()), origin_(0, 0, initHeight), normal_(Eigen::Vector3f::UnitZ()) {
+: roll_(0), pitch_(0), yaw_(0), rotater_(0.f, Eigen::Vector3f(0, 0, 1)), origin_(0, 0, initHeight), normal_(Eigen::Vector3f::UnitZ()) {
 	int legIdx;
 	int servoNum;
 
@@ -191,34 +216,34 @@ void Plane::rotate(float roll, float pitch, float yaw) {
 	this->rotate(norm);
 }
 
-void Plane::rotate(Eigen::Vector3f newNormal, float angle) {
+void Plane::rotate(const Eigen::Vector3f& newNormal, float angle) {
 	Eigen::Vector3f initNormal(Eigen::Vector3f::UnitZ()), rotate;
+	normal_ = newNormal;
 	float rotateAngle;
-	newNormal.normalize();
-	if(initNormal == newNormal) {
+	normal_.normalize();
+	if(initNormal == normal_) {
 		rotateAngle = 0.f;
 		rotate = initNormal;
 	} else {
-		rotate = initNormal.cross(newNormal);
+		rotate = initNormal.cross(normal_);
 		rotate.normalize();
-		rotateAngle = acos(initNormal.dot(newNormal));
+		rotateAngle = acos(initNormal.dot(normal_));
 	}
-	normal_ = newNormal;
-	Eigen::AngleAxisf rotater0(angle, Eigen::Vector3f::UnitZ());
+	Eigen::AngleAxisf rotater0(angle, Eigen::Vector3f(0, 0, 1));
 	rotater_ = Eigen::AngleAxisf(rotateAngle, rotate);
 	for(int legIdx = 0; legIdx < 6; legIdx++) {
 		leg_[legIdx]->setOrigin((Eigen::Vector3f)(rotater_ * (rotater0 * leg_[legIdx]->_initOrigin)));
 	}
 }
 
-Eigen::Vector3f Plane::projection(Eigen::Vector3f point) const {
+Eigen::Vector3f Plane::projection(const Eigen::Vector3f& point) const {
 	Eigen::Vector3f op = point - origin_, result;
 	float lProj = op.dot(normal_);
 	result = point - lProj * normal_;
 	return result;
 }
 
-void Plane::translate(Eigen::Vector3f origin) {
+void Plane::translate(const Eigen::Vector3f& origin) {
 	origin_ = origin;
 	for(int legIdx = 0; legIdx < 6; legIdx++) {
 		leg_[legIdx]->setPosition(leg_[legIdx]->_pos);
@@ -245,5 +270,47 @@ void Plane::writeSerial(Serial& serial) {
 	if(ss.str().size() != 0) {
 		ss << "\r\n";
 		serial.write(ss.str().c_str(), ss.str().size(), maxTime);
+	}
+
+}
+
+Hexapod::Hexapod() : uart_("/dev/ttyAMA0") {}
+
+void Hexapod::parseMovement() {
+	int nextT[6] = {0}, next[6] = {1, 1, 1, 1, 1, 1};
+	for(int legIdx = 0; legIdx < 6; legIdx++) {
+		if(base_.leg_[legIdx]->moveGroup_.size() == 1)
+			nextT[legIdx] = std::numeric_limits<int>::max();
+		else {
+			nextT[legIdx] = base_.leg_[legIdx]->moveGroup_[1].deltaT_;
+		}
+	}
+	int lastT = 0, currT = 0;
+	for(int minPos = min_element(nextT, nextT + 6) - nextT;
+			nextT[minPos] != std::numeric_limits<int>::max();
+			minPos = min_element(nextT, nextT + 6) - nextT) {
+			Leg *minLeg = base_.leg_[minPos];
+		if(nextT[minPos] <= currT) {
+			if((++next[minPos]) == minLeg->moveGroup_.size())
+				nextT[minPos] = std::numeric_limits<int>::max();
+			else
+				nextT[minPos] += minLeg->moveGroup_[next[minPos]].deltaT_;
+			continue;
+		} else {
+			currT = nextT[minPos];
+			if((++next[minPos]) == minLeg->moveGroup_.size())
+				nextT[minPos] = std::numeric_limits<int>::max();
+			else
+				nextT[minPos] += minLeg->moveGroup_[next[minPos]].deltaT_;
+			for(int legIdx = 0; legIdx < 6; legIdx++) {
+				base_.leg_[legIdx]->setPosition(base_.leg_[legIdx]->requestPosition(currT), currT - lastT);
+//				std::cout << base_.leg_[legIdx]->requestPosition(currT) << '\n';
+			}
+//			std::cout << '\n';
+			base_.writeSerial(uart_);
+			//sleep currT - lastT
+			usleep((currT - lastT) * 1000);
+			lastT = currT;
+		}
 	}
 }
