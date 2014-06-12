@@ -327,6 +327,9 @@ void Hexapod::moveLinear(const Eigen::Vector3f& direction, int totalT) {
 	base_.leg_[2]->step(direction, totalT, 40);
 	base_.leg_[4]->step(direction, totalT, 40);
 	this->parseMovement();
+	base_.leg_[0]->resetMovement();
+	base_.leg_[2]->resetMovement();
+	base_.leg_[4]->resetMovement();
 	base_.translate(base_.origin_ + direction);
 	base_.writeSerial(uart_);
 	usleep(500000);
@@ -334,4 +337,7 @@ void Hexapod::moveLinear(const Eigen::Vector3f& direction, int totalT) {
 	base_.leg_[3]->step(direction * 2, totalT, 40);
 	base_.leg_[5]->step(direction * 2, totalT, 40);
 	this->parseMovement();
+	base_.leg_[1]->resetMovement();
+	base_.leg_[3]->resetMovement();
+	base_.leg_[5]->resetMovement();
 }
