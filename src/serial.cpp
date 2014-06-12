@@ -9,13 +9,11 @@
 
 using namespace hex;
 
-//#define TEST
-
 Serial::Serial(const char* path) {
 	_blockTime = 0;
 	_timeStamp = std::clock();
 	_busy = false;
-#ifndef TEST
+#ifndef __APPLE__
 	//-------------------------
 	//----- SETUP USART 0 -----
 	//-------------------------

@@ -129,6 +129,13 @@ void Leg::setOrigin(const Eigen::Vector3f& newOrigin) {
 	this->setPosition(_pos);
 }
 
+void Leg::step(const Eigen::Vector3f& dire, int totalT, float height) {
+	this->resetMovement();
+	this->addMovement(_pos + _refPlane.normal_ * height, totalT / 3);
+	this->addMovement(_pos + dire + _refPlane.normal_ * height, totalT / 3);
+	this->addMovement(_pos + dire, totalT / 3);
+}
+
 void Leg::resetMovement() {
 	moveGroup_.clear();
 	moveGroup_.push_back(Movement(_pos, 0));
@@ -313,4 +320,18 @@ void Hexapod::parseMovement() {
 			lastT = currT;
 		}
 	}
+}
+
+void Hexapod::moveLinear(const Eigen::Vector3f& direction, int totalT) {
+	base_.leg_[0]->step(direction, totalT);
+	base_.leg_[2]->step(direction, totalT);
+	base_.leg_[4]->step(direction, totalT);
+	this->parseMovement();
+	base_.translate(base_.origin_ + direction);
+	base_.writeSerial(uart_);
+	usleep(500000);
+	base_.leg_[1]->step(direction * 2, totalT);
+	base_.leg_[3]->step(direction * 2, totalT);
+	base_.leg_[5]->step(direction * 2, totalT);
+	this->parseMovement();
 }

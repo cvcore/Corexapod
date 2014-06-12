@@ -47,8 +47,9 @@ class Leg {
 public:
 	Leg(SideType side, const Eigen::Vector3f& origin, const Eigen::Vector3f& pos, const std::vector<int>& servoNumberVec, const Plane& refPlane);
 	~Leg();
-	void setPosition(const Eigen::Vector3f& pos, int time = 0);
+	void setPosition(const Eigen::Vector3f& pos, int time = 500);
 	void setOrigin(const Eigen::Vector3f& newOrigin);
+	void step(const Eigen::Vector3f& dire, int totalT, float height = 10.f);
 	void resetMovement();
 	void addMovement(const Eigen::Vector3f& position, int deltaT); //deltaT in ms
 	Eigen::Vector3f requestPosition(int time) const; //time in ms
@@ -85,7 +86,7 @@ class Hexapod {
 public:
 	Hexapod();
 	void parseMovement();
-	void moveLinear();
+	void moveLinear(const Eigen::Vector3f& direction, int totalT);
 	Plane base_;
 	Serial uart_;
 };
