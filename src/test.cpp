@@ -13,9 +13,9 @@
 int main() {
 	try {
 		hex::Hexapod hexapod;
-		hexapod.base_.leg_[0]->addMovement(Eigen::Vector3f(140, 70, 10), 500);
+		hexapod.base_.leg_[0]->addMovement(Eigen::Vector3f(120, 50, 10), 500);
 		hexapod.base_.leg_[0]->addMovement(Eigen::Vector3f(150, 80, 0), 500);
-		hexapod.base_.leg_[1]->addMovement(Eigen::Vector3f(0, 143, 0), 500);
+		hexapod.base_.leg_[1]->addMovement(Eigen::Vector3f(0, 123, 0), 500);
 		hexapod.base_.leg_[1]->addMovement(Eigen::Vector3f(0, 133, 10), 200);
 		hexapod.parseMovement();
 	} catch (std::string& eMsg) {

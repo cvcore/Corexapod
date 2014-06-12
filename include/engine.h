@@ -85,6 +85,7 @@ class Hexapod {
 public:
 	Hexapod();
 	void parseMovement();
+	void moveLinear();
 	Plane base_;
 	Serial uart_;
 };
