@@ -18,7 +18,7 @@ int main() {
 //		hexapod.base_.leg_[1]->addMovement(Eigen::Vector3f(0, 123, 0), 500);
 //		hexapod.base_.leg_[1]->addMovement(Eigen::Vector3f(0, 133, 10), 200);
 //		hexapod.parseMovement();
-		hexapod.moveLinear(Eigen::Vector3f(20, 0, 0), 1000);
+		hexapod.moveLinear(Eigen::Vector3f(50, 0, 0), 1000);
 	} catch (std::string& eMsg) {
 		std::cout << eMsg << '\n';
 	}
