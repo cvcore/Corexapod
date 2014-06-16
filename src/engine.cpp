@@ -129,11 +129,11 @@ void Leg::setOrigin(const Eigen::Vector3f& newOrigin) {
 	this->setPosition(_pos);
 }
 
-void Leg::step(const Eigen::Vector3f& dire, int totalT, float height) {
+void Leg::step(const Eigen::Vector3f& unitMove, int totalT, float height) {
 	this->resetMovement();
 	this->addMovement(_pos + _refPlane.normal_ * height, totalT / 3);
-	this->addMovement(_pos + dire + _refPlane.normal_ * height, totalT / 3);
-	this->addMovement(_pos + dire, totalT / 3);
+	this->addMovement(_pos + unitMove + _refPlane.normal_ * height, totalT / 3);
+	this->addMovement(_pos + unitMove, totalT / 3);
 }
 
 void Leg::resetMovement() {
@@ -281,10 +281,10 @@ void Plane::writeSerial(Serial& serial) {
 
 }
 
-void Plane::stepGroup(const Eigen::Vector3f& dire, int stepT, const std::vector<int>& group, float height) {
+void Plane::stepGroup(const Eigen::Vector3f& unitMove, int stepT, const std::vector<int>& group, float height) {
 	std::vector<int>::const_iterator it = group.begin();
 	for(; it != group.end(); it++) {
-		leg_[*it]->step(dire, stepT, height);
+		leg_[*it]->step(unitMove, stepT, height);
 	}
 }
 
@@ -322,6 +322,7 @@ void Hexapod::parseMovement() {
 				nextT[minPos] = std::numeric_limits<int>::max();
 			else
 				nextT[minPos] += minLeg->moveGroup_[next[minPos]].deltaT_;
+			base_.translate(base_.origin_ + (base_.vel_.linear_ * (currT - lastT)));
 			for(int legIdx = 0; legIdx < 6; legIdx++) {
 				base_.leg_[legIdx]->setPosition(base_.leg_[legIdx]->requestPosition(currT), currT - lastT);
 //				std::cout << base_.leg_[legIdx]->requestPosition(currT) << '\n';
@@ -335,29 +336,37 @@ void Hexapod::parseMovement() {
 	}
 }
 
-void Hexapod::moveLinear(const Eigen::Vector3f& direction, int stepT, int count) {
-	int nextGroup = 1;
+void Hexapod::moveLinear(const Eigen::Vector3f& unitMove, int stepT, int count) {
+	int group = 1;
 	const int sGroup[2][3] = {{0, 2, 4}, {1, 3, 5}};
 	std::vector<int> sGroupVec[2];
 	sGroupVec[0] = std::vector<int>(sGroup[0], sGroup[0] + 3); sGroupVec[1] = std::vector<int>(sGroup[1], sGroup[1] + 3);
 
-	base_.stepGroup(direction, stepT, sGroupVec[0], 40.f);
+	base_.stepGroup(unitMove, stepT, sGroupVec[0], 40.f);
+	base_.vel_.linear_ = unitMove / stepT / 2;
 	this->parseMovement();
 	base_.resetMovementGroup(sGroupVec[0]);
-	base_.translate(base_.origin_ + direction);
+//	base_.translate(base_.origin_ + unitMove);
 	base_.writeSerial(uart_);
-	usleep(500000);
+//	usleep(500000);
 
-	for(; count > 0; count--, nextGroup = (nextGroup + 1) % 2) {
-		base_.stepGroup(direction * 2, stepT, sGroupVec[nextGroup], 40.f);
+	for(; count > 0; count--, group = (group + 1) % 2) {
+		base_.stepGroup(unitMove * 2, stepT, sGroupVec[group], 40.f);
+		base_.vel_.linear_ = unitMove / stepT;
 		this->parseMovement();
-		base_.resetMovementGroup(sGroupVec[nextGroup]);
-		base_.translate(base_.origin_ + direction);
+		base_.resetMovementGroup(sGroupVec[group]);
+//		base_.translate(base_.origin_ + unitMove);
 		base_.writeSerial(uart_);
-		usleep(500000);
+//		usleep(500000);
 	}
 
-	base_.stepGroup(direction, stepT, sGroupVec[nextGroup], 40.f);
+	base_.stepGroup(unitMove, stepT, sGroupVec[group], 40.f);
+	base_.vel_.linear_ = unitMove / stepT / 2;
 	this->parseMovement();
-	base_.resetMovementGroup(sGroupVec[nextGroup]);
+	base_.resetMovementGroup(sGroupVec[group]);
+	base_.vel_.linear_ = Eigen::Vector3f::Zero();
+}
+
+void Hexapod::moveAngular(const Eigen::Vector3f& direction, int stepT, int count) {
+
 }

@@ -26,7 +26,17 @@ typedef enum { left, right } SideType;
 
 class Plane;
 class Leg;
-struct Movement;
+
+struct Movement {
+	Movement(const Eigen::Vector3f& position, int deltaT) : position_(position), deltaT_(deltaT) {}
+	Eigen::Vector3f position_;
+	int deltaT_;
+};
+
+struct Velocity {
+	Velocity() : linear_(Eigen::Vector3f::Zero()), angular_(Eigen::Vector3f::Zero()) {}
+	Eigen::Vector3f linear_, angular_;
+};
 
 class Servo {
 public:
@@ -82,23 +92,18 @@ public:
 	float roll_, pitch_, yaw_;
 	Eigen::Vector3f initLegOrigin_[6], initLegPos_[6];
 	Eigen::AngleAxisf rotater_;
+	Velocity vel_; //unit: mm/ms
 };
 
 class Hexapod {
 public:
 	Hexapod();
 	void parseMovement();
-	void moveLinear(const Eigen::Vector3f& direction, int totalT, int count = 1);
+	void moveLinear(const Eigen::Vector3f& direction, int stepT, int count = 1);
+	void moveAngular(const Eigen::Vector3f& direction, int stepT, int count = 1);
 	Plane base_;
 	Serial uart_;
 };
-
-struct Movement {
-	Movement(const Eigen::Vector3f& position, int deltaT) : position_(position), deltaT_(deltaT) {}
-	Eigen::Vector3f position_;
-	int deltaT_;
-};
-
 
 
 }
