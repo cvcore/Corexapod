@@ -138,7 +138,7 @@ void Leg::step(const Eigen::Vector3f& unitDisp, int totalT, float height) {
 
 void Leg::turn(float unitAngularDisp, int totalT, float height) {
 	this->resetMovement();
-	Eigen::AngleAxisf rotater(unitAngularDisp, _refPlane.normal_);
+	Eigen::AngleAxisf rotater(unitAngularDisp, Eigen::Vector3f(0, 0, 1));
 	this->addMovement(_pos + _refPlane.normal_ * height, totalT / 3);
 	this->addMovement((Eigen::Vector3f)(rotater * _pos) + _refPlane.normal_ * height, totalT / 3);
 	this->addMovement((Eigen::Vector3f)(rotater * _pos), totalT / 3);
@@ -380,7 +380,7 @@ void Hexapod::moveLinear(const Eigen::Vector3f& unitDisp, int stepT, int count) 
 		this->parseMovement();
 		base_.resetMovementGroup(sGroupVec[group]);
 //		base_.translate(base_.origin_ + unitMove);
-		base_.writeSerial(uart_);
+//		base_.writeSerial(uart_);
 //		usleep(500000);
 	}
 
@@ -411,7 +411,7 @@ void Hexapod::moveAngular(float unitAngularDisp, int stepT, int count) {
 		this->parseMovement();
 		base_.resetMovementGroup(sGroupVec[group]);
 //		base_.translate(base_.origin_ + unitMove);
-		base_.writeSerial(uart_);
+//		base_.writeSerial(uart_);
 //		usleep(500000);
 	}
 
