@@ -129,11 +129,19 @@ void Leg::setOrigin(const Eigen::Vector3f& newOrigin) {
 	this->setPosition(_pos);
 }
 
-void Leg::step(const Eigen::Vector3f& unitMove, int totalT, float height) {
+void Leg::step(const Eigen::Vector3f& unitDisp, int totalT, float height) {
 	this->resetMovement();
-//	this->addMovement(_pos + _refPlane.normal_ * height, totalT / 3);
-	this->addMovement(_pos + unitMove + _refPlane.normal_ * height, totalT / 3);
-	this->addMovement(_pos + unitMove, totalT * 2 / 3);
+	this->addMovement(_pos + _refPlane.normal_ * height, totalT / 3);
+	this->addMovement(_pos + unitDisp + _refPlane.normal_ * height, totalT / 3);
+	this->addMovement(_pos + unitDisp, totalT / 3);
+}
+
+void Leg::turn(float unitAngularDisp, int totalT, float height) {
+	this->resetMovement();
+	Eigen::AngleAxisf rotater(unitAngularDisp, _refPlane.normal_);
+	this->addMovement(_pos + _refPlane.normal_ * height, totalT / 3);
+	this->addMovement((Eigen::Vector3f)(rotater * _pos) + _refPlane.normal_ * height, totalT / 3);
+	this->addMovement((Eigen::Vector3f)(rotater * _pos), totalT / 3);
 }
 
 void Leg::resetMovement() {
@@ -157,7 +165,7 @@ Eigen::Vector3f Leg::requestPosition(int time) const {
 }
 
 Plane::Plane()
-: roll_(0), pitch_(0), yaw_(0), rotater_(0.f, Eigen::Vector3f(0, 0, 1)), origin_(0, 0, initHeight), normal_(Eigen::Vector3f::UnitZ()) {
+: origin_(0, 0, initHeight), normal_(Eigen::Vector3f::UnitZ()), front_(Eigen::Vector3f::UnitX()) {
 	int legIdx;
 	int servoNum;
 
@@ -203,6 +211,7 @@ Plane::~Plane() {
 
 void Plane::rotate(float roll, float pitch, float yaw) {
 	Eigen::Vector3f norm(Eigen::Vector3f::UnitZ());
+	Eigen::Vector3f front(Eigen::Vector3f::UnitX());
 	Eigen::Matrix3f rM, pM, yM;
 	rM <<	0				, 0				, 0				,
 			0				, cos(roll)		, -sin(roll)	,
@@ -216,18 +225,18 @@ void Plane::rotate(float roll, float pitch, float yaw) {
 			sin(yaw)		, cos(yaw)		, 0				,
 			0				, 0				, 1				;
 
-	norm = rM * norm;
-	norm = pM * norm;
-	norm = yM * norm;
+	norm = (yM * (pM * (rM * norm)));
+	front = (yM * (pM * (rM * front)));
 
-	this->rotate(norm);
+	this->rotate(norm, front);
 }
 
-void Plane::rotate(const Eigen::Vector3f& newNormal, float angle) {
+//TODO: urgent! to be updated
+void Plane::rotate(const Eigen::Vector3f& newNormal, const Eigen::Vector3f& newFront) {
 	Eigen::Vector3f initNormal(Eigen::Vector3f::UnitZ()), rotate;
-	normal_ = newNormal;
 	float rotateAngle;
-	normal_.normalize();
+	normal_ = newNormal; front_ = newFront;
+	normal_.normalize(); front_.normalize();
 	if(initNormal == normal_) {
 		rotateAngle = 0.f;
 		rotate = initNormal;
@@ -236,10 +245,15 @@ void Plane::rotate(const Eigen::Vector3f& newNormal, float angle) {
 		rotate.normalize();
 		rotateAngle = acos(initNormal.dot(normal_));
 	}
-	Eigen::AngleAxisf rotater0(angle, Eigen::Vector3f(0, 0, 1));
-	rotater_ = Eigen::AngleAxisf(rotateAngle, rotate);
+
+	Eigen::AngleAxisf rot0(rotateAngle, rotate);
+	Eigen::Vector3f front0 = rot0 * Eigen::Vector3f::UnitX();
+	float frontRotAng = acos(front0.dot(front_));
+
+	Eigen::AngleAxisf rotater0(frontRotAng, Eigen::Vector3f(0, 0, 1)), rotater;
+	rotater = Eigen::AngleAxisf(rotateAngle, rotate);
 	for(int legIdx = 0; legIdx < 6; legIdx++) {
-		leg_[legIdx]->setOrigin((Eigen::Vector3f)(rotater_ * (rotater0 * leg_[legIdx]->_initOrigin)));
+		leg_[legIdx]->setOrigin((Eigen::Vector3f)(rotater * (rotater0 * leg_[legIdx]->_initOrigin)));
 	}
 }
 
@@ -250,8 +264,8 @@ Eigen::Vector3f Plane::projection(const Eigen::Vector3f& point) const {
 	return result;
 }
 
-void Plane::translate(const Eigen::Vector3f& origin) {
-	origin_ = origin;
+void Plane::translate(const Eigen::Vector3f& newOrigin) {
+	origin_ = newOrigin;
 	for(int legIdx = 0; legIdx < 6; legIdx++) {
 		leg_[legIdx]->setPosition(leg_[legIdx]->_pos);
 	}
@@ -281,10 +295,17 @@ void Plane::writeSerial(Serial& serial) {
 
 }
 
-void Plane::stepGroup(const Eigen::Vector3f& unitMove, int stepT, const std::vector<int>& group, float height) {
+void Plane::stepGroup(const Eigen::Vector3f& unitDisp, int stepT, const std::vector<int>& group, float height) {
 	std::vector<int>::const_iterator it = group.begin();
 	for(; it != group.end(); it++) {
-		leg_[*it]->step(unitMove, stepT, height);
+		leg_[*it]->step(unitDisp, stepT, height);
+	}
+}
+
+void Plane::turnGroup(float unitAngularDisp, int stepT, const std::vector<int>& group, float height) {
+	std::vector<int>::const_iterator it = group.begin();
+	for(; it != group.end(); it++) {
+		leg_[*it]->turn(unitAngularDisp, stepT, height);
 	}
 }
 
@@ -322,7 +343,10 @@ void Hexapod::parseMovement() {
 				nextT[minPos] = std::numeric_limits<int>::max();
 			else
 				nextT[minPos] += minLeg->moveGroup_[next[minPos]].deltaT_;
+
+			Eigen::AngleAxisf rotater(base_.vel_.angular_ * (currT - lastT), Eigen::Vector3f(0, 0, 1));
 			base_.translate(base_.origin_ + (base_.vel_.linear_ * (currT - lastT)));
+			base_.rotate((Eigen::Vector3f)(rotater * base_.normal_), (Eigen::Vector3f)(rotater * base_.front_));
 			for(int legIdx = 0; legIdx < 6; legIdx++) {
 				base_.leg_[legIdx]->setPosition(base_.leg_[legIdx]->requestPosition(currT), currT - lastT);
 //				std::cout << base_.leg_[legIdx]->requestPosition(currT) << '\n';
@@ -336,14 +360,14 @@ void Hexapod::parseMovement() {
 	}
 }
 
-void Hexapod::moveLinear(const Eigen::Vector3f& unitMove, int stepT, int count) {
+void Hexapod::moveLinear(const Eigen::Vector3f& unitDisp, int stepT, int count) {
 	int group = 1;
 	const int sGroup[2][3] = {{0, 2, 4}, {1, 3, 5}};
 	std::vector<int> sGroupVec[2];
 	sGroupVec[0] = std::vector<int>(sGroup[0], sGroup[0] + 3); sGroupVec[1] = std::vector<int>(sGroup[1], sGroup[1] + 3);
 
-	base_.stepGroup(unitMove, stepT, sGroupVec[0], 40.f);
-	base_.vel_.linear_ = unitMove / stepT / 2;
+	base_.stepGroup(unitDisp, stepT, sGroupVec[0], 40.f);
+	base_.vel_.linear_ = unitDisp / stepT / 2;
 	this->parseMovement();
 	base_.resetMovementGroup(sGroupVec[0]);
 //	base_.translate(base_.origin_ + unitMove);
@@ -351,8 +375,8 @@ void Hexapod::moveLinear(const Eigen::Vector3f& unitMove, int stepT, int count) 
 //	usleep(500000);
 
 	for(; count > 0; count--, group = (group + 1) % 2) {
-		base_.stepGroup(unitMove * 2, stepT, sGroupVec[group], 40.f);
-		base_.vel_.linear_ = unitMove / stepT;
+		base_.stepGroup(unitDisp * 2, stepT, sGroupVec[group], 40.f);
+		base_.vel_.linear_ = unitDisp / stepT;
 		this->parseMovement();
 		base_.resetMovementGroup(sGroupVec[group]);
 //		base_.translate(base_.origin_ + unitMove);
@@ -360,13 +384,40 @@ void Hexapod::moveLinear(const Eigen::Vector3f& unitMove, int stepT, int count) 
 //		usleep(500000);
 	}
 
-	base_.stepGroup(unitMove, stepT, sGroupVec[group], 40.f);
-	base_.vel_.linear_ = unitMove / stepT / 2;
+	base_.stepGroup(unitDisp, stepT, sGroupVec[group], 40.f);
+	base_.vel_.linear_ = unitDisp / stepT / 2;
 	this->parseMovement();
 	base_.resetMovementGroup(sGroupVec[group]);
 	base_.vel_.linear_ = Eigen::Vector3f::Zero();
 }
 
-void Hexapod::moveAngular(const Eigen::Vector3f& direction, int stepT, int count) {
+void Hexapod::moveAngular(float unitAngularDisp, int stepT, int count) {
+	int group = 1;
+	const int sGroup[2][3] = {{0, 2, 4}, {1, 3, 5}};
+	std::vector<int> sGroupVec[2];
+	sGroupVec[0] = std::vector<int>(sGroup[0], sGroup[0] + 3); sGroupVec[1] = std::vector<int>(sGroup[1], sGroup[1] + 3);
 
+	base_.turnGroup(unitAngularDisp, stepT, sGroupVec[0], 40.f);
+	base_.vel_.angular_ = unitAngularDisp / stepT / 2;
+	this->parseMovement();
+	base_.resetMovementGroup(sGroupVec[0]);
+//	base_.translate(base_.origin_ + unitMove);
+	base_.writeSerial(uart_);
+//	usleep(500000);
+
+	for(; count > 0; count--, group = (group + 1) % 2) {
+		base_.turnGroup(unitAngularDisp * 2, stepT, sGroupVec[group], 40.f);
+		base_.vel_.angular_ = unitAngularDisp / stepT;
+		this->parseMovement();
+		base_.resetMovementGroup(sGroupVec[group]);
+//		base_.translate(base_.origin_ + unitMove);
+		base_.writeSerial(uart_);
+//		usleep(500000);
+	}
+
+	base_.turnGroup(unitAngularDisp, stepT, sGroupVec[group], 40.f);
+	base_.vel_.angular_ = unitAngularDisp / stepT / 2;
+	this->parseMovement();
+	base_.resetMovementGroup(sGroupVec[group]);
+	base_.vel_.angular_ = 0;
 }

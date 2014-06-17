@@ -34,8 +34,9 @@ struct Movement {
 };
 
 struct Velocity {
-	Velocity() : linear_(Eigen::Vector3f::Zero()), angular_(Eigen::Vector3f::Zero()) {}
-	Eigen::Vector3f linear_, angular_;
+	Velocity() : linear_(Eigen::Vector3f::Zero()), angular_(0.f) {}
+	Eigen::Vector3f linear_;
+	float angular_;
 };
 
 class Servo {
@@ -59,7 +60,8 @@ public:
 	~Leg();
 	void setPosition(const Eigen::Vector3f& pos, int time = 500);
 	void setOrigin(const Eigen::Vector3f& newOrigin);
-	void step(const Eigen::Vector3f& dire, int stepT, float height = 10.f);
+	void step(const Eigen::Vector3f& unitDisp, int totalT, float height = 10.f);
+	void turn(float unitAngularDisp, int totalT, float height = 10.f);
 	void resetMovement();
 	void addMovement(const Eigen::Vector3f& position, int deltaT); //deltaT in ms
 	Eigen::Vector3f requestPosition(int time) const; //time in ms
@@ -78,29 +80,30 @@ class Plane {
 public:
 	Plane();
 	~Plane();
-	void rotate(float roll, float pitch, float yaw);
-	void rotate(const Eigen::Vector3f& newNormal, float angle = 0.f);
-	void translate(const Eigen::Vector3f& origin);
-	void writeSerial(Serial& serial);
 	Eigen::Vector3f projection(const Eigen::Vector3f& point) const;
-	void calibrate();//TODO
-	void stepGroup(const Eigen::Vector3f& dire, int stepT, const std::vector<int>& group, float height = 10.f);
+	void rotate(float roll, float pitch, float yaw);
+	void rotate(const Eigen::Vector3f& newNormal, const Eigen::Vector3f& newFront);
+	void translate(const Eigen::Vector3f& newOrigin);
+	void stepGroup(const Eigen::Vector3f& unitDisp, int stepT, const std::vector<int>& group, float height = 10.f);
+	void turnGroup(float unitAngularDisp, int stepT, const std::vector<int>& group, float height = 10.f);
 	void resetMovementGroup(const std::vector<int>& group);
+	void writeSerial(Serial& serial);
 
 	Leg* leg_[6];
-	Eigen::Vector3f origin_, normal_;
-	float roll_, pitch_, yaw_;
+	Eigen::Vector3f origin_, normal_, front_; //both normal_ and front_ should be normalized
+//	float roll_, pitch_, yaw_;
 	Eigen::Vector3f initLegOrigin_[6], initLegPos_[6];
 	Eigen::AngleAxisf rotater_;
-	Velocity vel_; //unit: mm/ms
+	Velocity vel_; //unit: mm/ms and rad/ms
 };
 
 class Hexapod {
 public:
 	Hexapod();
 	void parseMovement();
-	void moveLinear(const Eigen::Vector3f& direction, int stepT, int count = 1);
-	void moveAngular(const Eigen::Vector3f& direction, int stepT, int count = 1);
+	void moveLinear(const Eigen::Vector3f& unitDisp, int stepT, int count = 1);
+	void moveAngular(float unitAngularDisp, int stepT, int count = 1);
+	void calibrate();//TODO
 	Plane base_;
 	Serial uart_;
 };
