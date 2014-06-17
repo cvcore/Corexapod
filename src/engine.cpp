@@ -131,9 +131,9 @@ void Leg::setOrigin(const Eigen::Vector3f& newOrigin) {
 
 void Leg::step(const Eigen::Vector3f& unitMove, int totalT, float height) {
 	this->resetMovement();
-	this->addMovement(_pos + _refPlane.normal_ * height, totalT / 3);
+//	this->addMovement(_pos + _refPlane.normal_ * height, totalT / 3);
 	this->addMovement(_pos + unitMove + _refPlane.normal_ * height, totalT / 3);
-	this->addMovement(_pos + unitMove, totalT / 3);
+	this->addMovement(_pos + unitMove, totalT * 2 / 3);
 }
 
 void Leg::resetMovement() {
