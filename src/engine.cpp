@@ -139,9 +139,11 @@ void Leg::step(const Eigen::Vector3f& unitDisp, int totalT, float height) {
 void Leg::turn(float unitAngularDisp, int totalT, float height) {
 	this->resetMovement();
 	Eigen::AngleAxisf rotater(unitAngularDisp, Eigen::Vector3f(0, 0, 1));
+	Eigen::Vector3f newRelPos = rotater * (_pos - _refPlane.origin_),
+					newPos = newRelPos + _refPlane.origin_;
 	this->addMovement(_pos + _refPlane.normal_ * height, totalT / 3);
-	this->addMovement((Eigen::Vector3f)(rotater * _pos) + _refPlane.normal_ * height, totalT / 3);
-	this->addMovement((Eigen::Vector3f)(rotater * _pos), totalT / 3);
+	this->addMovement(newPos + _refPlane.normal_ * height, totalT / 3);
+	this->addMovement(newPos, totalT / 3);
 }
 
 void Leg::resetMovement() {
