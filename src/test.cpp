@@ -18,11 +18,12 @@ int main() {
 //		hexapod.base_.leg_[1]->addMovement(Eigen::Vector3f(0, 123, 0), 500);
 //		hexapod.base_.leg_[1]->addMovement(Eigen::Vector3f(0, 133, 10), 200);
 //		hexapod.parseMovement();
-		hexapod.base_.translate(Eigen::Vector3f(0, 0, 100));
+		hexapod.base_.translate(Eigen::Vector3f(0, 0, 120));
 		hexapod.base_.writeSerial(hexapod.uart_);
 		usleep(500000);
-		hexapod.moveLinear(Eigen::Vector3f(50, 0, 0), 1000, 5);
-		hexapod.moveAngular(3.1415926 / 10, 1000, 20);
+		hexapod.moveLinear(Eigen::Vector3f(50, 20, 0), 1000, 5);
+		hexapod.moveAngular(3.1415926 / 9, 1000, 5);
+		hexapod.moveLinear(Eigen::Vector3f(50, -20, 0), 1000, 5);
 	} catch (std::string& eMsg) {
 		std::cout << eMsg << '\n';
 	}
