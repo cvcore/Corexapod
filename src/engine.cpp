@@ -231,7 +231,6 @@ void Plane::rotate(float roll, float pitch, float yaw) {
 	this->rotate(norm, front);
 }
 
-//TODO: urgent! to be updated
 void Plane::rotate(const Eigen::Vector3f& newNormal, const Eigen::Vector3f& newFront) {
 	Eigen::Vector3f initNormal(Eigen::Vector3f::UnitZ()), rotate;
 	float rotateAngle;
@@ -249,6 +248,8 @@ void Plane::rotate(const Eigen::Vector3f& newNormal, const Eigen::Vector3f& newF
 	Eigen::AngleAxisf rot0(rotateAngle, rotate);
 	Eigen::Vector3f front0 = rot0 * Eigen::Vector3f::UnitX();
 	float frontRotAng = acos(front0.dot(front_));
+	if(front0.cross(front_).dot(normal_) < 0)
+		frontRotAng = PI * 2 - frontRotAng;
 
 	Eigen::AngleAxisf rotater0(frontRotAng, Eigen::Vector3f(0, 0, 1)), rotater;
 	rotater = Eigen::AngleAxisf(rotateAngle, rotate);
@@ -371,7 +372,7 @@ void Hexapod::moveLinear(const Eigen::Vector3f& unitDisp, int stepT, int count) 
 	this->parseMovement();
 	base_.resetMovementGroup(sGroupVec[0]);
 //	base_.translate(base_.origin_ + unitMove);
-	base_.writeSerial(uart_);
+//	base_.writeSerial(uart_);
 //	usleep(500000);
 
 	for(; count > 0; count--, group = (group + 1) % 2) {
@@ -402,7 +403,7 @@ void Hexapod::moveAngular(float unitAngularDisp, int stepT, int count) {
 	this->parseMovement();
 	base_.resetMovementGroup(sGroupVec[0]);
 //	base_.translate(base_.origin_ + unitMove);
-	base_.writeSerial(uart_);
+//	base_.writeSerial(uart_);
 //	usleep(500000);
 
 	for(; count > 0; count--, group = (group + 1) % 2) {
