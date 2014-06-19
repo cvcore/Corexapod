@@ -22,7 +22,7 @@ int main() {
 //		hexapod.base_.rotate(Eigen::Vector3f(1, 0, 5), Eigen::Vector3f(5, 0, -1));
 		hexapod.base_.writeSerial(hexapod.uart_);
 		usleep(500000);
-		hexapod.calibrate();
+//		hexapod.calibrate();
 		hexapod.moveLinear(Eigen::Vector3f(50, 20, 0), 800, 5);
 		hexapod.moveAngular(3.1415926 / 9, 800, 5);
 		hexapod.moveLinear(Eigen::Vector3f(50, -20, 0), 800, 5);

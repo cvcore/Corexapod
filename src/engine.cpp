@@ -250,17 +250,22 @@ Plane::Plane(const char *paramFilePath)
 	}
 
 	if(paramFilePath != NULL) {
+		std::cout << "[Info] Initializing using parameter file.\n";
 		std::ifstream paramFile(paramFilePath);
-		int legIdx, sIdx;
-		Servo* pServo;
-		while(!paramFile.eof()) {
-			paramFile >> legIdx >> sIdx;
-			if(legIdx < 0 || legIdx >= 6 || sIdx < 0 || sIdx >= 3) {
-				std::cout << "Invalid parameter, skipped\n";
-				continue;
+		if(paramFile.is_open()) {
+			int legIdx, sIdx;
+			Servo* pServo;
+			while(!paramFile.eof()) {
+				paramFile >> legIdx >> sIdx;
+				if(legIdx < 0 || legIdx >= 6 || sIdx < 0 || sIdx >= 3) {
+					std::cout << "[Warning] Invalid parameter, skipped\n";
+					continue;
+				}
+				pServo = leg_[legIdx]->_servo[sIdx];
+				paramFile >> pServo->_minPW >> pServo->_maxPW;
 			}
-			pServo = leg_[legIdx]->_servo[sIdx];
-			paramFile >> pServo->_minPW >> pServo->_maxPW;
+		} else {
+			std::cout << "[Warning] Parameter file not exist!\n";
 		}
 	}
 }
@@ -397,7 +402,7 @@ void Plane::resetMovementGroup(const std::vector<int>& group) {
 		leg_[*it]->resetMovement();
 }
 
-Hexapod::Hexapod() : uart_("/dev/ttyAMA0") {}
+Hexapod::Hexapod() : uart_("/dev/ttyAMA0"), base_("calib.param") {}
 
 void Hexapod::parseMovement() {
 	int nextT[6] = {0}, next[6] = {1, 1, 1, 1, 1, 1};
