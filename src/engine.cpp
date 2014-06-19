@@ -452,6 +452,13 @@ void Hexapod::moveLinear(const Eigen::Vector3f& unitDisp, int stepT, int count) 
 	const int sGroup[2][3] = {{0, 2, 4}, {1, 3, 5}};
 	std::vector<int> sGroupVec[2];
 	sGroupVec[0] = std::vector<int>(sGroup[0], sGroup[0] + 3); sGroupVec[1] = std::vector<int>(sGroup[1], sGroup[1] + 3);
+	Eigen::Vector3f unitDispXOY(unitDisp);
+	unitDispXOY(2) = 0;
+	float azimuth = acos(unitDispXOY.dot(Eigen::Vector3f(1, 0, 0)) / unitDispXOY.norm());
+	if(unitDispXOY.y() < 0)
+		azimuth = PI * 2 - azimuth;
+	Eigen::AngleAxisf dispTF(azimuth, Eigen::Vector3f(0, 0, 1));
+	unitDisp = dispTF * unitDisp;
 
 	base_.stepGroup(unitDisp, stepT, sGroupVec[0], 20.f);
 	base_.vel_.linear_ = unitDisp / stepT / 2;
