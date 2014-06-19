@@ -56,7 +56,7 @@ void Servo::calibrate(Serial& serial) {
 	std::cin >> pwbuf;
 	while(pwbuf != std::string("f")) {
 		pw1 = atof(pwbuf.c_str());
-		ss.clear();
+		ss.str(std::string());
 		ss << "#" << _number << "P" << pw1 << "T" << 100 << "\r\n";
 		serial.write(ss.str().c_str(), ss.str().size());
 		std::cin >> pwbuf;
@@ -67,7 +67,7 @@ void Servo::calibrate(Serial& serial) {
 	std::cin >> pwbuf;
 	while(pwbuf != std::string("f")) {
 		pw2 = atof(pwbuf.c_str());
-		ss.clear();
+		ss.str(std::string());
 		ss << "#" << _number << "P" << pw2 << "T" << 100 << "\r\n";
 		serial.write(ss.str().c_str(), ss.str().size());
 		std::cin >> pwbuf;
