@@ -262,7 +262,7 @@ Plane::Plane(const char *paramFilePath)
 					continue;
 				}
 				pServo = leg_[legIdx]->_servo[sIdx];
-				paramFile >> pServo->_minPW >> pServo->_maxPW;
+				paramFile >> pServo->_number >> pServo->_minPW >> pServo->_maxPW;
 			}
 		} else {
 			std::cout << "[Warning] Parameter file not exist!\n";
