@@ -24,8 +24,8 @@ int main() {
 		usleep(500000);
 //		hexapod.calibrate();
 		hexapod.moveLinear(Eigen::Vector3f(0, 30, 0), 1000, 5);
-		hexapod.moveAngular(3.1415926 / 9, 1000, 9);
-		hexapod.moveLinear(Eigen::Vector3f(80, 0, 0), 1000, 5);
+		hexapod.moveAngular(3.1415926 / 9, 1000, 8);
+		hexapod.moveLinear(Eigen::Vector3f(65, 0, 0), 1000, 5);
 	} catch (std::string& eMsg) {
 		std::cout << eMsg << '\n';
 	}
