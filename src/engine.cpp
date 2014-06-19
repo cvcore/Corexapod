@@ -371,6 +371,7 @@ void Plane::calibrate(Serial& serial) {
 				pServo->setAngle(PI / 2);
 			else
 				pServo->setAngle(0.f);
+			writeSerial(serial);
 		}
 	}
 	conf.close();
