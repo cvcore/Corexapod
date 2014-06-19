@@ -52,8 +52,6 @@ void Servo::calibrate(Serial& serial) {
 	std::string pwbuf;
 	std::stringstream ss;
 	std::cout << "#" << _number << "," << _jointType << ":\n";
-	std::cout << "Angle 1(deg):";
-	std::cin >> ang1;
 	std::cout << "PW1(" << _minPW << "):";
 	std::cin >> pwbuf;
 	while(pwbuf != std::string("f")) {
@@ -62,8 +60,8 @@ void Servo::calibrate(Serial& serial) {
 		serial.write(ss.str().c_str(), ss.str().size());
 		std::cin >> pwbuf;
 	}
-	std::cout << "Angle 2(deg):";
-	std::cin >> ang2;
+	std::cout << "Angle 1(deg):";
+	std::cin >> ang1;
 	std::cout << "PW2(" << _maxPW << "):";
 	std::cin >> pwbuf;
 	while(pwbuf != std::string("f")) {
@@ -72,6 +70,8 @@ void Servo::calibrate(Serial& serial) {
 		serial.write(ss.str().c_str(), ss.str().size());
 		std::cin >> pwbuf;
 	}
+	std::cout << "Angle 2(deg):";
+	std::cin >> ang2;
 
 	ang1 = ang1 * PI / 180.f;
 	ang2 = ang2 * PI / 180.f;
