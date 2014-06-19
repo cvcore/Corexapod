@@ -20,6 +20,7 @@ Servo::Servo(int jointType, SideType side, int number) {
 	_curPW = 1500;
 	_changed = true;
 	_number = number;
+	_jointType = jointType;
 	//TODO: Add a self calibration method.
 	if(side == left) {
 		if(jointType % 3 == 2) {
@@ -29,7 +30,7 @@ Servo::Servo(int jointType, SideType side, int number) {
 		} else {
 			_minPW = 2500;
 			_maxPW = 500;
-			_angle = 90.f;
+			_angle = PI / 2;
 		}
 	} else if(side == right) {
 		if(jointType % 3 == 2) {
@@ -39,19 +40,58 @@ Servo::Servo(int jointType, SideType side, int number) {
 		} else {
 			_minPW = 500;
 			_maxPW = 2500;
-			_angle = 90.f;
+			_angle = PI / 2;
 		}
 	} else {
 		assert(false);
 	}
 }
 
-void Servo::setAngle(float angle) {
-	int lastPW = _curPW;
-	_angle = angle;
-	_curPW = (_maxPW - _minPW) * _angle / PI + _minPW;
-	if(lastPW != _curPW)
+void Servo::calibrate(Serial& serial) {
+	float ang1, ang2, pw1, pw2;
+	std::string pwbuf;
+	std::stringstream ss;
+	std::cout << "#" << _number << "," << _jointType << ":\n";
+	std::cout << "Angle 1(deg):";
+	std::cin >> ang1;
+	std::cout << "PW1(" << _minPW << "):";
+	std::cin >> pwbuf;
+	while(pwbuf != std::string("f")) {
+		pw1 = atof(pwbuf.c_str());
+		ss << "#" << _number << "P" << pw1 << "T" << 100 << "\r\n";
+		serial.write(ss.str().c_str(), ss.str().size());
+		std::cin >> pwbuf;
+	}
+	std::cout << "Angle 2(deg):";
+	std::cin >> ang2;
+	std::cout << "PW2(" << _maxPW << "):";
+	std::cin >> pwbuf;
+	while(pwbuf != std::string("f")) {
+		pw2 = atof(pwbuf.c_str());
+		ss << "#" << _number << "P" << pw2 << "T" << 100 << "\r\n";
+		serial.write(ss.str().c_str(), ss.str().size());
+		std::cin >> pwbuf;
+	}
+
+	ang1 = ang1 * PI / 180.f;
+	ang2 = ang2 * PI / 180.f;
+	_minPW = pw1 - (float)(pw2 - pw1) * ang1 / (ang2 - ang1);
+	_maxPW = _minPW + (pw2 - pw1) * PI / (ang2 - ang1);
+	this->setAngle(_angle);
+
+	std::cout << "Servo " << _number << "finished calibration\n";
+}
+
+void Servo::setPW(int pw) {
+	if(pw != _curPW) {
 		_changed = true;
+		_curPW = pw;
+	}
+}
+
+void Servo::setAngle(float angle) {
+	_angle = angle;
+	this->setPW((_maxPW - _minPW) * _angle / PI + _minPW);
 }
 
 Leg::Leg(SideType side, const Eigen::Vector3f& origin, const Eigen::Vector3f& pos, const std::vector<int>& servoNumberVec, const Plane& refPlane)
@@ -166,7 +206,7 @@ Eigen::Vector3f Leg::requestPosition(int time) const {
 		return (lastPosition + (it->position_ - lastPosition) * (float)(time - sumT) / it->deltaT_);
 }
 
-Plane::Plane()
+Plane::Plane(const char *paramFilePath)
 : origin_(0, 0, initHeight), normal_(Eigen::Vector3f::UnitZ()), front_(Eigen::Vector3f::UnitX()) {
 	int legIdx;
 	int servoNum;
@@ -202,6 +242,21 @@ Plane::Plane()
 		servoVec.push_back(servoNum - 1);
 		servoVec.push_back(servoNum - 2);
 		leg_[legIdx] = new Leg(right, initLegOrigin_[legIdx], initLegPos_[legIdx], servoVec, *this);
+	}
+
+	if(paramFilePath != NULL) {
+		std::ifstream paramFile(paramFilePath);
+		int legIdx, sIdx;
+		Servo* pServo;
+		while(!paramFile.eof()) {
+			paramFile >> legIdx >> sIdx;
+			if(legIdx < 0 || legIdx >= 6 || sIdx < 0 || sIdx >= 3) {
+				std::cout << "Invalid parameter, skipped\n";
+				continue;
+			}
+			pServo = leg_[legIdx]->_servo[sIdx];
+			paramFile >> pServo->_minPW >> pServo->_maxPW;
+		}
 	}
 }
 
@@ -296,6 +351,19 @@ void Plane::writeSerial(Serial& serial) {
 		serial.write(ss.str().c_str(), ss.str().size(), maxTime);
 	}
 
+}
+
+void Plane::calibrate(Serial& serial) {
+	std::ofstream conf("calib.conf");
+	int legIdx, sIdx;
+	for(legIdx = 0; legIdx < 6; legIdx++) {
+		for(sIdx = 0; sIdx < 3; sIdx++) {
+			Servo *pServo = leg_[legIdx]->_servo[sIdx];
+			pServo->calibrate(serial);
+			conf << legIdx << ' ' << sIdx << ' ' << pServo->_number << ' ' << pServo->_minPW << ' ' << pServo->_maxPW << ' ' << std::endl;
+		}
+	}
+	conf.close();
 }
 
 void Plane::stepGroup(const Eigen::Vector3f& unitDisp, int stepT, const std::vector<int>& group, float height) {
@@ -423,4 +491,8 @@ void Hexapod::moveAngular(float unitAngularDisp, int stepT, int count) {
 	this->parseMovement();
 	base_.resetMovementGroup(sGroupVec[group]);
 	base_.vel_.angular_ = 0;
+}
+
+void Hexapod::calibrate() {
+	base_.calibrate(uart_);
 }

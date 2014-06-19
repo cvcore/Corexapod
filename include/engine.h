@@ -19,6 +19,7 @@
 #include <queue>
 #include <sstream>
 #include <iostream>
+#include <fstream>
 
 namespace hex {
 
@@ -43,13 +44,14 @@ class Servo {
 public:
 	Servo(int jointType, SideType side, int number);
 //	~Servo();
+	void calibrate(Serial& serial);
 	void setPW(int pw);
 	void setAngle(float angle);
 	int getPW();
 	friend class Leg;
 	friend class Plane;
 private:
-	int _minPW, _maxPW, _curPW, _actTime, _number;
+	int _minPW, _maxPW, _curPW, _actTime, _number, _jointType;
 	float _angle;
 	bool _changed;
 };
@@ -78,7 +80,7 @@ private:
 
 class Plane {
 public:
-	Plane();
+	Plane(const char *paramFilePath = NULL);
 	~Plane();
 	Eigen::Vector3f projection(const Eigen::Vector3f& point) const;
 	void rotate(float roll, float pitch, float yaw);
@@ -88,6 +90,7 @@ public:
 	void turnGroup(float unitAngularDisp, int stepT, const std::vector<int>& group, float height = 10.f);
 	void resetMovementGroup(const std::vector<int>& group);
 	void writeSerial(Serial& serial);
+	void calibrate(Serial& serial);
 
 	Leg* leg_[6];
 	Eigen::Vector3f origin_, normal_, front_; //both normal_ and front_ should be normalized
