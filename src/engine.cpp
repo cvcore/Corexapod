@@ -447,7 +447,7 @@ void Hexapod::parseMovement() {
 	}
 }
 
-void Hexapod::moveLinear(const Eigen::Vector3f& unitDisp, int stepT, int count) {
+void Hexapod::moveLinear(Eigen::Vector3f unitDisp, int stepT, int count) {
 	int group = 1;
 	const int sGroup[2][3] = {{0, 2, 4}, {1, 3, 5}};
 	std::vector<int> sGroupVec[2];

@@ -104,7 +104,7 @@ class Hexapod {
 public:
 	Hexapod();
 	void parseMovement();
-	void moveLinear(const Eigen::Vector3f& unitDisp, int stepT, int count = 1);
+	void moveLinear(Eigen::Vector3f unitDisp, int stepT, int count = 1);
 	void moveAngular(float unitAngularDisp, int stepT, int count = 1);
 	void calibrate();//TODO
 	Plane base_;
