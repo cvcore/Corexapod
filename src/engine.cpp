@@ -48,40 +48,43 @@ Servo::Servo(int jointType, SideType side, int number) {
 }
 
 void Servo::calibrate(Serial& serial) {
-	float ang1, ang2, pw1, pw2;
-	std::string pwbuf;
-	std::stringstream ss;
-	std::cout << "#" << _number << "," << _jointType << ":\n";
-	std::cout << "PW1(" << _minPW << "):";
-	std::cin >> pwbuf;
-	while(pwbuf != std::string("f")) {
-		pw1 = atof(pwbuf.c_str());
-		ss.str(std::string());
-		ss << "#" << _number << "P" << pw1 << "T" << 100 << "\r\n";
-		serial.write(ss.str().c_str(), ss.str().size());
+	char stat = 0;
+	for(; stat != 'y'; std::cin >> stat) {
+		float ang1, ang2, pw1, pw2;
+		std::string pwbuf;
+		std::stringstream ss;
+		std::cout << "#" << _number << "," << _jointType << ":\n";
+		std::cout << "PW1(" << _minPW << "):";
 		std::cin >> pwbuf;
-	}
-	std::cout << "Angle 1(deg):";
-	std::cin >> ang1;
-	std::cout << "PW2(" << _maxPW << "):";
-	std::cin >> pwbuf;
-	while(pwbuf != std::string("f")) {
-		pw2 = atof(pwbuf.c_str());
-		ss.str(std::string());
-		ss << "#" << _number << "P" << pw2 << "T" << 100 << "\r\n";
-		serial.write(ss.str().c_str(), ss.str().size());
+		while(pwbuf != std::string("f")) {
+			pw1 = atof(pwbuf.c_str());
+			ss.str(std::string());
+			ss << "#" << _number << "P" << pw1 << "T" << 100 << "\r\n";
+			serial.write(ss.str().c_str(), ss.str().size());
+			std::cin >> pwbuf;
+		}
+		std::cout << "Angle 1(deg):";
+		std::cin >> ang1;
+		std::cout << "PW2(" << _maxPW << "):";
 		std::cin >> pwbuf;
+		while(pwbuf != std::string("f")) {
+			pw2 = atof(pwbuf.c_str());
+			ss.str(std::string());
+			ss << "#" << _number << "P" << pw2 << "T" << 100 << "\r\n";
+			serial.write(ss.str().c_str(), ss.str().size());
+			std::cin >> pwbuf;
+		}
+		std::cout << "Angle 2(deg):";
+		std::cin >> ang2;
+
+		ang1 = ang1 * PI / 180.f;
+		ang2 = ang2 * PI / 180.f;
+		_minPW = pw1 - (float)(pw2 - pw1) * ang1 / (ang2 - ang1);
+		_maxPW = _minPW + (pw2 - pw1) * PI / (ang2 - ang1);
+		this->setAngle(_angle);
+
+		std::cout << "Servo " << _number << " minPW:" << _minPW << " maxPW:" << _maxPW << " finish calibration?(y/n):";
 	}
-	std::cout << "Angle 2(deg):";
-	std::cin >> ang2;
-
-	ang1 = ang1 * PI / 180.f;
-	ang2 = ang2 * PI / 180.f;
-	_minPW = pw1 - (float)(pw2 - pw1) * ang1 / (ang2 - ang1);
-	_maxPW = _minPW + (pw2 - pw1) * PI / (ang2 - ang1);
-	this->setAngle(_angle);
-
-	std::cout << "Servo " << _number << "finished calibration\n";
 }
 
 void Servo::setPW(int pw) {
@@ -363,6 +366,11 @@ void Plane::calibrate(Serial& serial) {
 			Servo *pServo = leg_[legIdx]->_servo[sIdx];
 			pServo->calibrate(serial);
 			conf << legIdx << ' ' << sIdx << ' ' << pServo->_number << ' ' << pServo->_minPW << ' ' << pServo->_maxPW << ' ' << std::endl;
+			conf.flush();
+			if(pServo->_jointType != 2)
+				pServo->setAngle(PI / 2);
+			else
+				pServo->setAngle(0.f);
 		}
 	}
 	conf.close();
