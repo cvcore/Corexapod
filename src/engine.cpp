@@ -453,7 +453,7 @@ void Hexapod::moveLinear(const Eigen::Vector3f& unitDisp, int stepT, int count) 
 	std::vector<int> sGroupVec[2];
 	sGroupVec[0] = std::vector<int>(sGroup[0], sGroup[0] + 3); sGroupVec[1] = std::vector<int>(sGroup[1], sGroup[1] + 3);
 
-	base_.stepGroup(unitDisp, stepT, sGroupVec[0], 40.f);
+	base_.stepGroup(unitDisp, stepT, sGroupVec[0], 20.f);
 	base_.vel_.linear_ = unitDisp / stepT / 2;
 	this->parseMovement();
 	base_.resetMovementGroup(sGroupVec[0]);
@@ -462,7 +462,7 @@ void Hexapod::moveLinear(const Eigen::Vector3f& unitDisp, int stepT, int count) 
 //	usleep(500000);
 
 	for(; count > 0; count--, group = (group + 1) % 2) {
-		base_.stepGroup(unitDisp * 2, stepT, sGroupVec[group], 40.f);
+		base_.stepGroup(unitDisp * 2, stepT, sGroupVec[group], 20.f);
 		base_.vel_.linear_ = unitDisp / stepT;
 		this->parseMovement();
 		base_.resetMovementGroup(sGroupVec[group]);
@@ -471,7 +471,7 @@ void Hexapod::moveLinear(const Eigen::Vector3f& unitDisp, int stepT, int count) 
 //		usleep(500000);
 	}
 
-	base_.stepGroup(unitDisp, stepT, sGroupVec[group], 40.f);
+	base_.stepGroup(unitDisp, stepT, sGroupVec[group], 20.f);
 	base_.vel_.linear_ = unitDisp / stepT / 2;
 	this->parseMovement();
 	base_.resetMovementGroup(sGroupVec[group]);
