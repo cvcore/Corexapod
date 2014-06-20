@@ -462,7 +462,7 @@ void Hexapod::moveLinear(Eigen::Vector3f unitDisp, int stepT, int count) {
 	Eigen::AngleAxisf dispTF(azimuth, Eigen::Vector3f(0, 0, 1));
 	unitDisp = dispTF * unitDisp;
 
-	base_.stepGroup(unitDisp, stepT / 2, sGroupVec[0], 20.f);
+	base_.stepGroup(unitDisp, stepT, sGroupVec[0], 20.f);
 	base_.vel_.linear_ = unitDisp / stepT / 2;
 	this->parseMovement();
 	base_.resetMovementGroup(sGroupVec[0]);
@@ -480,7 +480,7 @@ void Hexapod::moveLinear(Eigen::Vector3f unitDisp, int stepT, int count) {
 //		usleep(500000);
 	}
 
-	base_.stepGroup(unitDisp, stepT / 2, sGroupVec[group], 20.f);
+	base_.stepGroup(unitDisp, stepT, sGroupVec[group], 20.f);
 	base_.vel_.linear_ = unitDisp / stepT / 2;
 	this->parseMovement();
 	base_.resetMovementGroup(sGroupVec[group]);
@@ -495,7 +495,7 @@ void Hexapod::moveAngular(float unitAngularDisp, int stepT, int count) {
 	std::vector<int> sGroupVec[2];
 	sGroupVec[0] = std::vector<int>(sGroup[0], sGroup[0] + 3); sGroupVec[1] = std::vector<int>(sGroup[1], sGroup[1] + 3);
 
-	base_.turnGroup(unitAngularDisp, stepT / 2, sGroupVec[0], 20.f);
+	base_.turnGroup(unitAngularDisp, stepT, sGroupVec[0], 20.f);
 	base_.vel_.angular_ = unitAngularDisp / stepT / 2;
 	this->parseMovement();
 	base_.resetMovementGroup(sGroupVec[0]);
@@ -513,7 +513,7 @@ void Hexapod::moveAngular(float unitAngularDisp, int stepT, int count) {
 //		usleep(500000);
 	}
 
-	base_.turnGroup(unitAngularDisp, stepT / 2, sGroupVec[group], 20.f);
+	base_.turnGroup(unitAngularDisp, stepT, sGroupVec[group], 20.f);
 	base_.vel_.angular_ = unitAngularDisp / stepT / 2;
 	this->parseMovement();
 	base_.resetMovementGroup(sGroupVec[group]);
