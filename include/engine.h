@@ -69,6 +69,7 @@ public:
 	Eigen::Vector3f requestPosition(int time) const; //time in ms
 
 	friend class Plane;
+	friend class Hexapod;
 	std::vector<Movement> moveGroup_;
 private:
 	Servo* _servo[3];
@@ -106,7 +107,9 @@ public:
 	void parseMovement();
 	void moveLinear(Eigen::Vector3f unitDisp, int stepT, int count = 1);
 	void moveAngular(float unitAngularDisp, int stepT, int count = 1);
-	void calibrate();//TODO
+	void calibrate();
+	void waveFrontLegs(int totalT);
+
 	Plane base_;
 	Serial uart_;
 };

@@ -26,6 +26,7 @@ int main() {
 		hexapod.moveLinear(Eigen::Vector3f(0, 30, 0), 800, 5);
 		hexapod.moveAngular(3.1415926 / 9, 800, 8);
 		hexapod.moveLinear(Eigen::Vector3f(65, 0, 0), 800, 5);
+		hexapod.waveFrontLegs(3000);
 	} catch (std::string& eMsg) {
 		std::cout << eMsg << '\n';
 	}

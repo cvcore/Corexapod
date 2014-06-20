@@ -448,6 +448,8 @@ void Hexapod::parseMovement() {
 }
 
 void Hexapod::moveLinear(Eigen::Vector3f unitDisp, int stepT, int count) {
+	if(count <= 0)
+		return;
 	int group = 1;
 	const int sGroup[2][3] = {{0, 2, 4}, {1, 3, 5}};
 	std::vector<int> sGroupVec[2];
@@ -460,7 +462,7 @@ void Hexapod::moveLinear(Eigen::Vector3f unitDisp, int stepT, int count) {
 	Eigen::AngleAxisf dispTF(azimuth, Eigen::Vector3f(0, 0, 1));
 	unitDisp = dispTF * unitDisp;
 
-	base_.stepGroup(unitDisp, stepT, sGroupVec[0], 20.f);
+	base_.stepGroup(unitDisp, stepT / 2, sGroupVec[0], 20.f);
 	base_.vel_.linear_ = unitDisp / stepT / 2;
 	this->parseMovement();
 	base_.resetMovementGroup(sGroupVec[0]);
@@ -468,7 +470,7 @@ void Hexapod::moveLinear(Eigen::Vector3f unitDisp, int stepT, int count) {
 //	base_.writeSerial(uart_);
 //	usleep(500000);
 
-	for(; count > 0; count--, group = (group + 1) % 2) {
+	for(; count > 1; count--, group = (group + 1) % 2) {
 		base_.stepGroup(unitDisp * 2, stepT, sGroupVec[group], 20.f);
 		base_.vel_.linear_ = unitDisp / stepT;
 		this->parseMovement();
@@ -478,7 +480,7 @@ void Hexapod::moveLinear(Eigen::Vector3f unitDisp, int stepT, int count) {
 //		usleep(500000);
 	}
 
-	base_.stepGroup(unitDisp, stepT, sGroupVec[group], 20.f);
+	base_.stepGroup(unitDisp, stepT / 2, sGroupVec[group], 20.f);
 	base_.vel_.linear_ = unitDisp / stepT / 2;
 	this->parseMovement();
 	base_.resetMovementGroup(sGroupVec[group]);
@@ -486,12 +488,14 @@ void Hexapod::moveLinear(Eigen::Vector3f unitDisp, int stepT, int count) {
 }
 
 void Hexapod::moveAngular(float unitAngularDisp, int stepT, int count) {
+	if(count <= 0)
+		return;
 	int group = 1;
 	const int sGroup[2][3] = {{0, 2, 4}, {1, 3, 5}};
 	std::vector<int> sGroupVec[2];
 	sGroupVec[0] = std::vector<int>(sGroup[0], sGroup[0] + 3); sGroupVec[1] = std::vector<int>(sGroup[1], sGroup[1] + 3);
 
-	base_.turnGroup(unitAngularDisp, stepT, sGroupVec[0], 20.f);
+	base_.turnGroup(unitAngularDisp, stepT / 2, sGroupVec[0], 20.f);
 	base_.vel_.angular_ = unitAngularDisp / stepT / 2;
 	this->parseMovement();
 	base_.resetMovementGroup(sGroupVec[0]);
@@ -499,7 +503,7 @@ void Hexapod::moveAngular(float unitAngularDisp, int stepT, int count) {
 //	base_.writeSerial(uart_);
 //	usleep(500000);
 
-	for(; count > 0; count--, group = (group + 1) % 2) {
+	for(; count > 1; count--, group = (group + 1) % 2) {
 		base_.turnGroup(unitAngularDisp * 2, stepT, sGroupVec[group], 20.f);
 		base_.vel_.angular_ = unitAngularDisp / stepT;
 		this->parseMovement();
@@ -509,7 +513,7 @@ void Hexapod::moveAngular(float unitAngularDisp, int stepT, int count) {
 //		usleep(500000);
 	}
 
-	base_.turnGroup(unitAngularDisp, stepT, sGroupVec[group], 20.f);
+	base_.turnGroup(unitAngularDisp, stepT / 2, sGroupVec[group], 20.f);
 	base_.vel_.angular_ = unitAngularDisp / stepT / 2;
 	this->parseMovement();
 	base_.resetMovementGroup(sGroupVec[group]);
@@ -518,4 +522,25 @@ void Hexapod::moveAngular(float unitAngularDisp, int stepT, int count) {
 
 void Hexapod::calibrate() {
 	base_.calibrate(uart_);
+}
+
+void Hexapod::waveFrontLegs(int totalT) {
+	typedef Eigen::Vector3f v3f;
+	if(totalT < 1000) {
+		std::cout << "Allowed time " << totalT << " too short, skipped\n";
+		return;
+	}
+	const int midLegs[2] = {1, 4};
+	Eigen::Vector3f turnAxis(base_.front_.cross(Eigen::Vector3f(0, -1, 0))), oldNorm(base_.normal_), oldFront(base_.front_);
+	Eigen::AngleAxisf turn1(PI / 6, turnAxis);
+
+	base_.stepGroup(Eigen::Vector3f(70, 0, 0), totalT * 0.1, std::vector<int>(midLegs, midLegs + 2), 20.f);
+	base_.translate(base_.origin_ + Eigen::Vector3f(0, 0, 20));
+	base_.rotate((Eigen::Vector3f)(turn1 * oldNorm), (Eigen::Vector3f)(turn1 * oldNorm));
+	base_.writeSerial(uart_);
+
+	Eigen::Vector3f oldPos0(base_.leg_[0]->_pos), oldPos3(base_.leg_[3]->_pos);
+	base_.leg_[0]->setPosition(base_.origin_ + v3f(110, 40, 40));
+	base_.leg_[3]->setPosition(base_.origin_ + v3f(110, -40, 0));
+	base_.writeSerial(uart_);
 }
