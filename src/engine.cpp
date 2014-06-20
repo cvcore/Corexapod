@@ -532,9 +532,11 @@ void Hexapod::waveFrontLegs(int totalT) {
 	}
 	const int midLegs[2] = {1, 4};
 	Eigen::Vector3f turnAxis(base_.front_.cross(Eigen::Vector3f(0, -1, 0))), oldNorm(base_.normal_), oldFront(base_.front_);
+	turnAxis.normalize();
 	Eigen::AngleAxisf turn1(PI / 6, turnAxis);
 
 	base_.stepGroup(Eigen::Vector3f(70, 0, 0), totalT * 0.1, std::vector<int>(midLegs, midLegs + 2), 20.f);
+	this->parseMovement();
 	base_.translate(base_.origin_ + Eigen::Vector3f(0, 0, 20));
 	base_.rotate((Eigen::Vector3f)(turn1 * oldNorm), (Eigen::Vector3f)(turn1 * oldFront));
 	base_.writeSerial(uart_);
