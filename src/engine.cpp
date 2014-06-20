@@ -548,3 +548,8 @@ void Hexapod::waveFrontLegs(int totalT) {
 //	base_.leg_[3]->setPosition(base_.origin_ + v3f(110, -40, 0));
 //	base_.writeSerial(uart_);
 }
+
+void Hexapod::parseActionFile(char *path, char *methodName) {
+
+}
+

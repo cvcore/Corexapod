@@ -10,7 +10,7 @@
 #define ENGINE_H_
 
 #include "serial.h"
-#include "Eigen/Dense"
+#include <Eigen/Dense>
 #include <cmath>
 #include <cassert>
 #include <limits>
@@ -109,6 +109,7 @@ public:
 	void moveAngular(float unitAngularDisp, int stepT, int count = 1);
 	void calibrate();
 	void waveFrontLegs(int totalT);
+	void parseActionFile(char *path, char *methodName);
 
 	Plane base_;
 	Serial uart_;

@@ -1,5 +1,4 @@
 project(Corexapod)
-
 cmake_minimum_required(VERSION 2.8.2)
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
@@ -17,15 +16,22 @@ if(    NOT cmake_build_type_tolower STREQUAL "debug"
   message(FATAL_ERROR "Unknown build type \"${CMAKE_BUILD_TYPE}\". Allowed values are Debug, Release, RelWithDebInfo (case-insensitive).")
 endif()
 
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH})
+
+# set include dirs
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 set( Boost_USE_STATIC_LIBS ON ) 
 find_package(Boost 1.40 COMPONENTS thread date_time program_options filesystem system REQUIRED)
 include_directories(${BOOST_INCLUDE_DIR})
 
-#set the default path for built executables to the "bin" directory
+find_package(Eigen3 REQUIRED)
+include_directories(${EIGEN3_INCLUDE_DIR})
+
+
+# set the default path for built executables to the "bin" directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
+# set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 set( LIB_SRC
