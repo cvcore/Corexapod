@@ -537,8 +537,10 @@ void Hexapod::waveFrontLegs(int totalT) {
 
 	base_.stepGroup(Eigen::Vector3f(70, 0, 0), 2000, std::vector<int>(midLegs, midLegs + 2), 40.f);
 	this->parseMovement();
-	base_.translate(base_.origin_ + Eigen::Vector3f(0, 0, 20));
-//	base_.rotate((Eigen::Vector3f)(turn1 * oldNorm), (Eigen::Vector3f)(turn1 * oldFront));
+	base_.translate(base_.origin_ + Eigen::Vector3f(0, 0, 50));
+	base_.writeSerial(uart_);
+	usleep(500000);
+	base_.rotate((Eigen::Vector3f)(turn1 * oldNorm), (Eigen::Vector3f)(turn1 * oldFront));
 	base_.writeSerial(uart_);
 
 //	Eigen::Vector3f oldPos0(base_.leg_[0]->_pos), oldPos3(base_.leg_[3]->_pos);
