@@ -5,7 +5,7 @@
  *      Author: core
  */
 
-#include "engine.h"
+#include "engine.hpp"
 
 using namespace hex;
 using namespace std;
@@ -402,7 +402,8 @@ void Plane::resetMovementGroup(const std::vector<int>& group) {
 		leg_[*it]->resetMovement();
 }
 
-Hexapod::Hexapod() : uart_("/dev/ttyAMA0"), base_("calib.param") {}
+Hexapod::Hexapod() : uart_("/dev/ttyAMA0"), base_("calib.param"), _actionFileContentsAvailiable(false) {
+}
 
 void Hexapod::parseMovement() {
 	int nextT[6] = {0}, next[6] = {1, 1, 1, 1, 1, 1};
@@ -549,7 +550,35 @@ void Hexapod::waveFrontLegs(int totalT) {
 //	base_.writeSerial(uart_);
 }
 
-void Hexapod::parseActionFile(char *path, char *methodName) {
+void Hexapod::readActionFile(const char *path) {
+	std::ifstream actionFile(path, std::ios::in | std::ios::binary);
+	if(actionFile) {
+		actionFile.seekg(0, std::ios::end);
+		_actionFileContents.resize(actionFile.tellg());
+		actionFile.seekg(0, std::ios::beg);
+		actionFile.read(&_actionFileContents[0], _actionFileContents.size());
+		actionFile.close();
+	} else {
+		std::cout << "File " << path << " not found!\n";
+		return;
+	}
+}
+
+void Hexapod::parseActionFile(const std::string& methodName) {
+	size_t startPos = _actionFileContents.find(methodName);
+	std::string::const_iterator it;
+	if(startPos == std::string::npos) {
+		std::cout << "Method " << methodName << " not found.\n";
+	}
+
+	for(it = _actionFileContents.begin() + startPos; it != _actionFileContents.end() && *it != '{'; it++);
+	if(*it != '{') {
+		std::cout  << "[Parser] Syntax error, missing '{'\n";
+		return;
+	}
+	for(it++; it != _actionFileContents.end() && !isalpha(*it); it++);
+	if(!isalpha(*it))
+		std::cout << "[Parser] Missing action\n";
 
 }
 

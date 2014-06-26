@@ -22,7 +22,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 set( Boost_USE_STATIC_LIBS ON ) 
-find_package(Boost 1.40 COMPONENTS thread date_time program_options filesystem system REQUIRED)
+find_package(Boost 1.40 COMPONENTS thread date_time program_options filesystem system regex REQUIRED)
 include_directories(${BOOST_INCLUDE_DIR})
 
 find_package(Eigen3 REQUIRED)
@@ -37,14 +37,14 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 set( LIB_SRC
     src/engine.cpp
     src/serial.cpp
+    src/parser.cpp
 )
 
 add_library( corexapod SHARED ${LIB_SRC} )
-target_link_libraries( corexapod )
+target_link_libraries( corexapod ${Boost_LIBRARIES})
 
 add_executable( test src/test.cpp )
 target_link_libraries( test corexapod )
 
-#add_executable( testboost src/testboost.cpp )
-#target_link_libraries( testboost ${Boost_LIBRARIES} )
-
+add_executable( testParser src/testParser.cpp )
+target_link_libraries( testParser corexapod )

@@ -6,10 +6,9 @@
  *      Author: core
  */
 
-#ifndef ENGINE_H_
-#define ENGINE_H_
+#ifndef ENGINE_HPP_
+#define ENGINE_HPP_
 
-#include "serial.h"
 #include <Eigen/Dense>
 #include <cmath>
 #include <cassert>
@@ -20,6 +19,8 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include "serial.hpp"
+//#include "parser.hpp"
 
 namespace hex {
 
@@ -109,10 +110,14 @@ public:
 	void moveAngular(float unitAngularDisp, int stepT, int count = 1);
 	void calibrate();
 	void waveFrontLegs(int totalT);
-	void parseActionFile(char *path, char *methodName);
+	void readActionFile(const char *path);
+	void parseActionFile(const std::string& methodName);
 
 	Plane base_;
 	Serial uart_;
+private:
+	std::string _actionFileContents;
+	bool _actionFileContentsAvailiable;
 };
 
 
@@ -120,4 +125,4 @@ public:
 
 
 
-#endif /* ENGINE_H_ */
+#endif /* ENGINE_HPP_ */

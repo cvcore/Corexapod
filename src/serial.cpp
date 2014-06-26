@@ -5,7 +5,7 @@
  *      Author: core
  */
 
-#include "serial.h"
+#include "serial.hpp"
 
 using namespace hex;
 
@@ -54,6 +54,8 @@ Serial::Serial(const char* path) {
 	_options.c_lflag = 0;
 	tcflush(_filedes, TCIFLUSH);
 	tcsetattr(_filedes, TCSANOW, &_options);
+#else
+	_filedes = 0;
 #endif
 }
 

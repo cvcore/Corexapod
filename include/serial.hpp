@@ -5,8 +5,8 @@
  *      Author: core
  */
 
-#ifndef SERIAL_H_
-#define SERIAL_H_
+#ifndef SERIAL_HPP_
+#define SERIAL_HPP_
 
 #ifdef TEST
 #include <iostream>
@@ -43,4 +43,4 @@ private:
 
 }
 
-#endif /* SERIAL_H_ */
+#endif /* SERIAL_HPP_ */
