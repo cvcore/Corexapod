@@ -29,6 +29,10 @@
 #include <boost/bind.hpp>
 #include <Eigen/Dense>
 
+extern "C" {
+#include <unistd.h>
+}
+
 #include "engine.hpp"
 
 namespace qi = boost::spirit::qi;
@@ -46,7 +50,7 @@ struct Group {
 struct Line {
 	std::vector<Group> group_;
 	int time_;
-	bool emptyLine_;
+	bool empty_;
 };
 
 struct Block {

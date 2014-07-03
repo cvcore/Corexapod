@@ -22,7 +22,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 	hex::Line,
 	(std::vector<hex::Group>, group_)
 	(int, time_)
-	(bool, emptyLine_)
+	(bool, empty_)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -138,6 +138,9 @@ void Parser::parseLine(const Line& line) const {
 	std::vector<Group>::const_iterator it;
 	for(it = line.group_.begin(); it != line.group_.end(); it++) {
 		Eigen::Vector3f newVec(it->x_, it->y_, it->z_);
+		if(line.empty_) {
+			::usleep(line.time_ * 1000);
+		}
 		switch(it->groupType_) {
 		case 'B' :
 			switch(it->moveType_) {
@@ -166,6 +169,7 @@ void Parser::parseLine(const Line& line) const {
 				break;
 			}
 			_hexapod.parseMovement();
+			_hexapod.base_.resetMovementGroup(it->members_);
 			break;
 		}
 	}
