@@ -169,9 +169,11 @@ void Parser::parseLine(const Line& line) const {
 				break;
 			}
 			_hexapod.parseMovement();
-			_hexapod.base_.resetMovementGroup(it->members_);
 			break;
 		}
+		const int allMembers[6] = {0, 1, 2, 3, 4, 5};
+		std::vector<int> allMembersVec(allMembers, allMembers + 6);
+		_hexapod.base_.resetMovementGroup(allMembersVec);
 	}
 }
 
