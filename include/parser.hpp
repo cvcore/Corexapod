@@ -46,6 +46,7 @@ struct Group {
 struct Line {
 	std::vector<Group> group_;
 	int time_;
+	bool emptyLine_;
 };
 
 struct Block {

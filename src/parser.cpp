@@ -22,6 +22,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 	hex::Line,
 	(std::vector<hex::Group>, group_)
 	(int, time_)
+	(bool, emptyLine_)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -55,7 +56,8 @@ struct ActionScriptParser : qi::grammar<Iterator, ActionScript(), qi::space_type
 				>> char_[at_c<2>(_val) = qi::_1]
 				>> '(' >> float_[at_c<3>(_val) = qi::_1 ] >> ',' >> float_[at_c<4>(_val) = qi::_1 ] >> ',' >> float_[at_c<5>(_val) = qi::_1 ] >> ')';
 
-		line_ = +grp_[push_back(at_c<0>(_val), qi::_1)] >> char_('T') >> int_[at_c<1>(_val) = qi::_1];
+		line_ = string("NOP")[at_c<2>(_val) = true] |
+				eps[at_c<2>(_val) = false] >> +grp_[push_back(at_c<0>(_val), qi::_1)] >> char_('T') >> int_[at_c<1>(_val) = qi::_1];
 
 		blk_ = +(char_ - "{")[at_c<0>(_val) += _1]
 		         >> '{'
