@@ -136,6 +136,7 @@ bool Parser::act(const std::string& methodName) {
 
 void Parser::parseLine(const Line& line) const {
 	std::vector<Group>::const_iterator it;
+	bool baseLine = false;
 	for(it = line.group_.begin(); it != line.group_.end(); it++) {
 		Eigen::Vector3f newVec(it->x_, it->y_, it->z_);
 		if(line.empty_) {
@@ -143,6 +144,7 @@ void Parser::parseLine(const Line& line) const {
 		}
 		switch(it->groupType_) {
 		case 'B' :
+			baseLine = true;
 			switch(it->moveType_) {
 			case 'N':
 				_hexapod.base_.rotateNorm(newVec, line.time_);
@@ -151,7 +153,7 @@ void Parser::parseLine(const Line& line) const {
 				_hexapod.base_.rotateFront(newVec, line.time_);
 				break;
 			case 'O':
-				_hexapod.base_.translate(newVec, line.time_);
+				_hexapod.base_.translate(_hexapod.base_.origin_ + newVec, line.time_);
 				break;
 			default:
 				std::cout << "[Parser] Invalid move type.\n";
@@ -161,7 +163,7 @@ void Parser::parseLine(const Line& line) const {
 		case 'L':
 			switch(it->moveType_) {
 			case 'S':
-				_hexapod.base_.stepGroup(newVec, line.time_, it->members_); // use default height
+				_hexapod.base_.stepGroup(newVec, line.time_, it->members_, 40.f);
 				break;
 			case 'M':
 				//if not absolute
@@ -171,10 +173,15 @@ void Parser::parseLine(const Line& line) const {
 			break;
 		}
 	}
-	_hexapod.parseMovement();
-	const int allMembers[6] = {0, 1, 2, 3, 4, 5};
-	std::vector<int> allMembersVec(allMembers, allMembers + 6);
-	_hexapod.base_.resetMovementGroup(allMembersVec);
+	if(baseLine) {
+		_hexapod.base_.writeSerial(_hexapod.uart_);
+		::usleep(line.time_ * 1000);
+	} else {
+		_hexapod.parseMovement();
+		const int allMembers[6] = {0, 1, 2, 3, 4, 5};
+		std::vector<int> allMembersVec(allMembers, allMembers + 6);
+		_hexapod.base_.resetMovementGroup(allMembersVec);
+	}
 }
 
 }

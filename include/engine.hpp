@@ -66,6 +66,7 @@ public:
 	void step(const Eigen::Vector3f& unitDisp, int totalT, float height = 10.f);
 	void turn(float unitAngularDisp, int totalT, float height = 10.f);
 	void resetMovement();
+	/* For Parser */
 	void addMovement(const Eigen::Vector3f& position, int deltaT); //deltaT in ms
 	Eigen::Vector3f requestPosition(int time) const; //time in ms
 
@@ -90,6 +91,7 @@ public:
 	void rotateNorm(const Eigen::Vector3f& newNormal, int time = 500);
 	void rotateFront(const Eigen::Vector3f& newFront, int time = 500);
 	void translate(const Eigen::Vector3f& newOrigin, int time = 500);
+	/* For Parser */
 	void stepGroup(const Eigen::Vector3f& unitDisp, int stepT, const std::vector<int>& group, float height = 10.f);
 	void turnGroup(float unitAngularDisp, int stepT, const std::vector<int>& group, float height = 10.f);
 	void addRelMovementGroup(const Eigen::Vector3f& disp, int deltaT, const std::vector<int>& group);
