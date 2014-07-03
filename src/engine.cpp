@@ -168,8 +168,10 @@ void Leg::setPosition(const Eigen::Vector3f& pos, int time) {
 	_servo[1]->setAngle(delta - theta);
 
 	_servo[0]->_actTime = _servo[1]->_actTime = _servo[2]->_actTime = time;
-	if(time < 50)
-		std::cout << "time interval: " << time << " too short, may cause problems\n";
+	if(time < 50) {
+		std::cout << "[Leg] Time interval: " << time << " too short, may cause problems. Setting to minimum.\n";
+		time = 50;
+	}
 }
 
 void Leg::setOrigin(const Eigen::Vector3f& newOrigin, int time) {

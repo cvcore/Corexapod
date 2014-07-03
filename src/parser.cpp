@@ -127,7 +127,7 @@ bool Parser::act(const std::string& methodName) {
 		std::cout << "[Parser] Method name not exist.\n";
 		return false;
 	}
-	Block block = _index[methodName];
+	Block block = _index.at(methodName);
 	for_each(block.line_.begin(), block.line_.end(), boost::bind(&Parser::parseLine, this, boost::lambda::_1));
 	return true;
 }
