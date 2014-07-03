@@ -62,7 +62,7 @@ public:
 	Leg(SideType side, const Eigen::Vector3f& origin, const Eigen::Vector3f& pos, const std::vector<int>& servoNumberVec, const Plane& refPlane);
 	~Leg();
 	void setPosition(const Eigen::Vector3f& pos, int time = 500);
-	void setOrigin(const Eigen::Vector3f& newOrigin);
+	void setOrigin(const Eigen::Vector3f& newOrigin, int time = 500);
 	void step(const Eigen::Vector3f& unitDisp, int totalT, float height = 10.f);
 	void turn(float unitAngularDisp, int totalT, float height = 10.f);
 	void resetMovement();
@@ -85,11 +85,14 @@ public:
 	Plane(const char *paramFilePath = NULL);
 	~Plane();
 	Eigen::Vector3f projection(const Eigen::Vector3f& point) const;
-	void rotate(float roll, float pitch, float yaw);
-	void rotate(const Eigen::Vector3f& newNormal, const Eigen::Vector3f& newFront);
-	void translate(const Eigen::Vector3f& newOrigin);
+	void rotate(float roll, float pitch, float yaw, int time = 500);
+	void rotate(const Eigen::Vector3f& newNormal, const Eigen::Vector3f& newFront, int time = 500);
+	void rotateNorm(const Eigen::Vector3f& newNormal, int time = 500);
+	void rotateFront(const Eigen::Vector3f& newFront, int time = 500);
+	void translate(const Eigen::Vector3f& newOrigin, int time = 500);
 	void stepGroup(const Eigen::Vector3f& unitDisp, int stepT, const std::vector<int>& group, float height = 10.f);
 	void turnGroup(float unitAngularDisp, int stepT, const std::vector<int>& group, float height = 10.f);
+	void addRelMovementGroup(const Eigen::Vector3f& disp, int deltaT, const std::vector<int>& group);
 	void resetMovementGroup(const std::vector<int>& group);
 	void writeSerial(Serial& serial);
 	void calibrate(Serial& serial);
@@ -110,8 +113,6 @@ public:
 	void moveAngular(float unitAngularDisp, int stepT, int count = 1);
 	void calibrate();
 	void waveFrontLegs(int totalT);
-	void readActionFile(const char *path);
-	void parseActionFile(const std::string& methodName);
 
 	Plane base_;
 	Serial uart_;

@@ -45,6 +45,7 @@ struct ActionScriptParser : qi::grammar<Iterator, ActionScript(), qi::space_type
 		using boost::phoenix::push_back;
 		using boost::phoenix::ref;
 		using boost::phoenix::at_c;
+		using qi::_1;
 		float x = 0.f, y = 0.f, z = 0.f;
 
 		mem_ %= '[' >> (int_ % ',') >> ']';
@@ -79,6 +80,10 @@ Parser::Parser(const char* scriptPath, Hexapod& hexapod) : _hexapod(hexapod) {
 		return;
 	}
 	std::ifstream fin(scriptPath, std::ios::in | std::ios::binary);
+	if(!fin) {
+		std::cout << "[Parser] File open error.\n";
+		return;
+	}
 	std::string strin((std::istreambuf_iterator<char>(fin)), std::istreambuf_iterator<char>());
 	std::string::const_iterator begin(strin.begin()), end(strin.end());
 	ActionScriptParser<std::string::const_iterator> parser;
@@ -90,7 +95,7 @@ Parser::Parser(const char* scriptPath, Hexapod& hexapod) : _hexapod(hexapod) {
 void Parser::buildIndex() {
 	std::vector<Block>::const_iterator it;
 	for(it = _as.block_.begin(); it != _as.block_.end(); it++) {
-		_index.insert(std::make_pair(it->methodName_, *it));
+		_index.insert(std::pair<std::string, const Block&>(it->methodName_, *it));
 	}
 	// for each
 
@@ -115,6 +120,53 @@ std::ostream& operator<<(std::ostream& os, const Parser& p) {
 		}
 	}
 	return os;
+}
+
+bool Parser::act(const std::string& methodName) {
+	if(_index.count(methodName) == 0) {
+		std::cout << "[Parser] Method name not exist.\n";
+		return false;
+	}
+	Block block = _index[methodName];
+	for_each(block.line_.begin(), block.line_.end(), boost::bind(&Parser::parseLine, this, boost::lambda::_1));
+	return true;
+}
+
+void Parser::parseLine(const Line& line) const {
+	std::vector<Group>::const_iterator it;
+	for(it = line.group_.begin(); it != line.group_.end(); it++) {
+		Eigen::Vector3f newVec(it->x_, it->y_, it->z_);
+		switch(it->groupType_) {
+		case 'B' :
+			switch(it->moveType_) {
+			case 'N':
+				_hexapod.base_.rotateNorm(newVec, line.time_);
+				break;
+			case 'F':
+				_hexapod.base_.rotateFront(newVec, line.time_);
+				break;
+			case 'O':
+				_hexapod.base_.translate(newVec, line.time_);
+				break;
+			default:
+				std::cout << "[Parser] Invalid move type.\n";
+			}
+			break;
+
+		case 'L':
+			switch(it->moveType_) {
+			case 'S':
+				_hexapod.base_.stepGroup(newVec, line.time_, it->members_); // use default height
+				break;
+			case 'M':
+				//if not absolute
+				_hexapod.base_.addRelMovementGroup(newVec, line.time_, it->members_);
+				break;
+			}
+			_hexapod.parseMovement();
+			break;
+		}
+	}
 }
 
 }

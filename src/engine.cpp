@@ -15,13 +15,16 @@ const float initHeight = 29.0f + 140.801278f;
 const float leg1Len = 140.801278;
 const float leg2Len = 86.0;
 
+float rotationAngle(const Eigen::Vector3f& a, const Eigen::Vector3f& b) {
+	return acosf(a.dot(b) / (a.norm() * b.norm()));
+}
+
 Servo::Servo(int jointType, SideType side, int number) {
 	_actTime = 200; //ms
 	_curPW = 1500;
 	_changed = true;
 	_number = number;
 	_jointType = jointType;
-	//TODO: Add a self calibration method.
 	if(side == left) {
 		if(jointType % 3 == 2) {
 			_minPW = 1500;
@@ -169,9 +172,9 @@ void Leg::setPosition(const Eigen::Vector3f& pos, int time) {
 		std::cout << "time interval: " << time << " too short, may cause problems\n";
 }
 
-void Leg::setOrigin(const Eigen::Vector3f& newOrigin) {
+void Leg::setOrigin(const Eigen::Vector3f& newOrigin, int time) {
 	_origin = newOrigin;
-	this->setPosition(_pos);
+	this->setPosition(_pos, time);
 }
 
 void Leg::step(const Eigen::Vector3f& unitDisp, int totalT, float height) {
@@ -276,7 +279,7 @@ Plane::~Plane() {
 	}
 }
 
-void Plane::rotate(float roll, float pitch, float yaw) {
+void Plane::rotate(float roll, float pitch, float yaw, int time) {
 	Eigen::Vector3f norm(Eigen::Vector3f::UnitZ());
 	Eigen::Vector3f front(Eigen::Vector3f::UnitX());
 	Eigen::Matrix3f rM, pM, yM;
@@ -295,10 +298,10 @@ void Plane::rotate(float roll, float pitch, float yaw) {
 	norm = (yM * (pM * (rM * norm)));
 	front = (yM * (pM * (rM * front)));
 
-	this->rotate(norm, front);
+	this->rotate(norm, front, time);
 }
 
-void Plane::rotate(const Eigen::Vector3f& newNormal, const Eigen::Vector3f& newFront) {
+void Plane::rotate(const Eigen::Vector3f& newNormal, const Eigen::Vector3f& newFront, int time) {
 	Eigen::Vector3f initNormal(Eigen::Vector3f::UnitZ()), rotate;
 	float rotateAngle;
 	normal_ = newNormal; front_ = newFront;
@@ -321,8 +324,22 @@ void Plane::rotate(const Eigen::Vector3f& newNormal, const Eigen::Vector3f& newF
 	Eigen::AngleAxisf rotater0(frontRotAng, Eigen::Vector3f(0, 0, 1)), rotater;
 	rotater = Eigen::AngleAxisf(rotateAngle, rotate);
 	for(int legIdx = 0; legIdx < 6; legIdx++) {
-		leg_[legIdx]->setOrigin((Eigen::Vector3f)(rotater * (rotater0 * leg_[legIdx]->_initOrigin)));
+		leg_[legIdx]->setOrigin((Eigen::Vector3f)(rotater * (rotater0 * leg_[legIdx]->_initOrigin)), time);
 	}
+}
+
+void Plane::rotateNorm(const Eigen::Vector3f& newNormal, int time) {
+	Eigen::Vector3f rAxis = normal_.cross(newNormal), newFront;
+	Eigen::AngleAxisf aa(rotationAngle(newNormal, normal_), rAxis);
+	newFront = aa * front_;
+	this->rotate(newNormal, newFront, time);
+}
+
+void Plane::rotateFront(const Eigen::Vector3f& newFront, int time) {
+	Eigen::Vector3f rAxis = front_.cross(newFront), newNormal;
+	Eigen::AngleAxisf aa(rotationAngle(newFront, front_), rAxis);
+	newNormal = aa * normal_;
+	this->rotate(newNormal, newFront, time);
 }
 
 Eigen::Vector3f Plane::projection(const Eigen::Vector3f& point) const {
@@ -332,10 +349,10 @@ Eigen::Vector3f Plane::projection(const Eigen::Vector3f& point) const {
 	return result;
 }
 
-void Plane::translate(const Eigen::Vector3f& newOrigin) {
+void Plane::translate(const Eigen::Vector3f& newOrigin, int time) {
 	origin_ = newOrigin;
 	for(int legIdx = 0; legIdx < 6; legIdx++) {
-		leg_[legIdx]->setPosition(leg_[legIdx]->_pos);
+		leg_[legIdx]->setPosition(leg_[legIdx]->_pos, time);
 	}
 }
 
@@ -393,6 +410,13 @@ void Plane::turnGroup(float unitAngularDisp, int stepT, const std::vector<int>& 
 	std::vector<int>::const_iterator it = group.begin();
 	for(; it != group.end(); it++) {
 		leg_[*it]->turn(unitAngularDisp, stepT, height);
+	}
+}
+
+void Plane::addRelMovementGroup(const Eigen::Vector3f& disp, int deltaT, const std::vector<int>& group) {
+	std::vector<int>::const_iterator it;
+	for(it = group.begin(); it != group.end(); it++) {
+		leg_[*it]->addMovement(leg_[*it]->_pos + disp, deltaT);
 	}
 }
 
@@ -548,37 +572,5 @@ void Hexapod::waveFrontLegs(int totalT) {
 //	base_.leg_[0]->setPosition(base_.origin_ + v3f(110, 40, 40));
 //	base_.leg_[3]->setPosition(base_.origin_ + v3f(110, -40, 0));
 //	base_.writeSerial(uart_);
-}
-
-void Hexapod::readActionFile(const char *path) {
-	std::ifstream actionFile(path, std::ios::in | std::ios::binary);
-	if(actionFile) {
-		actionFile.seekg(0, std::ios::end);
-		_actionFileContents.resize(actionFile.tellg());
-		actionFile.seekg(0, std::ios::beg);
-		actionFile.read(&_actionFileContents[0], _actionFileContents.size());
-		actionFile.close();
-	} else {
-		std::cout << "File " << path << " not found!\n";
-		return;
-	}
-}
-
-void Hexapod::parseActionFile(const std::string& methodName) {
-	size_t startPos = _actionFileContents.find(methodName);
-	std::string::const_iterator it;
-	if(startPos == std::string::npos) {
-		std::cout << "Method " << methodName << " not found.\n";
-	}
-
-	for(it = _actionFileContents.begin() + startPos; it != _actionFileContents.end() && *it != '{'; it++);
-	if(*it != '{') {
-		std::cout  << "[Parser] Syntax error, missing '{'\n";
-		return;
-	}
-	for(it++; it != _actionFileContents.end() && !isalpha(*it); it++);
-	if(!isalpha(*it))
-		std::cout << "[Parser] Missing action\n";
-
 }
 

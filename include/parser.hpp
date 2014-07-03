@@ -26,6 +26,7 @@
 #include <boost/spirit/include/phoenix_container.hpp>
 #include <boost/fusion/adapted/struct.hpp>
 #include <boost/lambda/lambda.hpp>
+#include <boost/bind.hpp>
 #include <Eigen/Dense>
 
 #include "engine.hpp"
@@ -62,9 +63,11 @@ public:
 	Parser(const char* scriptPath, Hexapod& hexapod);
 	bool act(const std::string& methodName);
 	friend std::ostream& operator<<(std::ostream& os, const Parser& p);
+	void parseLine(const Line& line) const;
 
 private:
 	void buildIndex();
+
 	Hexapod& _hexapod;
 	ActionScript _as;
 	std::map<std::string, const Block&> _index;
