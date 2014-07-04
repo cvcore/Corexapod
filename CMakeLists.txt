@@ -43,8 +43,8 @@ set( LIB_SRC
 add_library( corexapod SHARED ${LIB_SRC} )
 target_link_libraries( corexapod ${Boost_LIBRARIES})
 
-add_executable( test src/test.cpp )
-target_link_libraries( test corexapod )
+#add_executable( test src/test.cpp )
+#target_link_libraries( test corexapod )
 
 add_executable( testParser src/testParser.cpp )
 target_link_libraries( testParser corexapod )
