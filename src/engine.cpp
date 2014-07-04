@@ -330,7 +330,7 @@ void Plane::rotate(const Eigen::Vector3f& newNormal, const Eigen::Vector3f& newF
 	}
 }
 
-void Plane::rotateNorm(const Eigen::Vector3f& newNormal, int time) {
+void Plane::rotateNorm(const Eigen::Vector3f& newNormal, int time) { // not numeric stable !
 	Eigen::Vector3f rAxis(normal_.cross(newNormal)), newFront;
 	rAxis.normalize();
 	Eigen::AngleAxisf aa(rotationAngle(newNormal, normal_), rAxis);
@@ -552,9 +552,9 @@ void Hexapod::calibrate() {
 	base_.calibrate(uart_);
 }
 
-void Hexapod::rotateBody(const Eigen::Vector3f& rotStartDir, int totalT) {
+void Hexapod::rotateBodyAround(const Eigen::Vector3f& rotStartNorm, int totalT) {
 	const int prec = 10;
-	Eigen::Vector3f currNorm(rotStartDir);
+	Eigen::Vector3f currNorm(rotStartNorm), initNorm(base_.normal_), initFront(base_.front_);
 	Eigen::AngleAxisf aa(PI * 2 / prec, Eigen::Vector3f(0, 0, 1));
 	for(int i = 0; i < prec; i++) {
 		base_.rotateNorm(currNorm, totalT / prec);
@@ -562,7 +562,7 @@ void Hexapod::rotateBody(const Eigen::Vector3f& rotStartDir, int totalT) {
 		usleep(totalT / prec * 1000);
 		currNorm = aa * currNorm;
 	}
-	base_.rotateNorm(rotStartDir, totalT / prec);
+	base_.rotate(initNorm, initFront, totalT / prec);
 	base_.writeSerial(uart_);
 	usleep(totalT / prec * 1000);
 	//currNorm cannot rotate to over 2 * pi ?
