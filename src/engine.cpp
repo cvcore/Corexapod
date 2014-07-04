@@ -331,7 +331,8 @@ void Plane::rotate(const Eigen::Vector3f& newNormal, const Eigen::Vector3f& newF
 }
 
 void Plane::rotateNorm(const Eigen::Vector3f& newNormal, int time) {
-	Eigen::Vector3f rAxis = normal_.cross(newNormal), newFront;
+	Eigen::Vector3f rAxis(normal_.cross(newNormal)), newFront;
+	rAxis.normalize();
 	Eigen::AngleAxisf aa(rotationAngle(newNormal, normal_), rAxis);
 	newFront = aa * front_;
 	this->rotate(newNormal, newFront, time);
