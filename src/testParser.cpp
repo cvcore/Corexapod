@@ -21,7 +21,17 @@ int main() {
 	hex::Parser p("src/actions.as", hexapod);
 //	hexapod.sitDance();
 	std::cout << p;
-	std::cin >> method;
-	p.act(method);
+	while(std::cin>>method) {
+		if(method == "w")
+			hexapod.moveLinear(Eigen::Vector3f(50, 0, 0), 1000, 3);
+		else if(method == "s")
+			hexapod.moveLinear(Eigen::Vector3f(-50, 0, 0), 1000, 3);
+		else if(method == "a")
+			hexapod.moveAngular(PI/10, 800, 2);
+		else if(method == "d")
+			hexapod.moveAngular(-PI/10, 800, 2);
+		else
+			p.act(method);
+	}
 	return 0;
 }
