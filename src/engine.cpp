@@ -356,6 +356,14 @@ Eigen::Vector3f Plane::projection(const Eigen::Vector3f& point) const {
 	return result;
 }
 
+Eigen::Vector3f Plane::tfVector(const Eigen::Vector3f& world) {
+	Eigen::Vector3f result, unitz(Eigen::Vector3f::UnitZ()), rUnitx;
+	Eigen::AngleAxisf aa1(rotationAngle(unitz, normal_), unitz.cross(normal_).normalized()), aa2;
+	rUnitx = aa1 * Eigen::Vector3f(1, 0, 0);
+	aa2 = Eigen::AngleAxisf(rotationAngle(rUnitx, front_), rUnitx.cross(front_).normalized());
+	return (aa1 * (aa2 * world));
+}
+
 void Plane::translate(const Eigen::Vector3f& newOrigin, int time) {
 	origin_ = newOrigin;
 	for(int legIdx = 0; legIdx < 6; legIdx++) {
@@ -490,13 +498,13 @@ void Hexapod::moveLinear(Eigen::Vector3f unitDisp, int stepT, int count) {
 	const int sGroup[2][3] = {{0, 2, 4}, {1, 3, 5}};
 	std::vector<int> sGroupVec[2];
 	sGroupVec[0] = std::vector<int>(sGroup[0], sGroup[0] + 3); sGroupVec[1] = std::vector<int>(sGroup[1], sGroup[1] + 3);
-	Eigen::Vector3f frontXOY(base_.front_);
-	frontXOY(2) = 0;
-	float azimuth = acos(frontXOY.dot(Eigen::Vector3f(1, 0, 0)) / frontXOY.norm());
-	if(frontXOY.y() < 0)
-		azimuth = PI * 2 - azimuth;
-	Eigen::AngleAxisf dispTF(azimuth, Eigen::Vector3f(0, 0, 1));
-	unitDisp = dispTF * unitDisp;
+//	Eigen::Vector3f frontXOY(base_.front_);
+//	frontXOY(2) = 0;
+//	float azimuth = acos(frontXOY.dot(Eigen::Vector3f(1, 0, 0)) / frontXOY.norm());
+//	if(frontXOY.y() < 0)
+//		azimuth = PI * 2 - azimuth;
+//	Eigen::AngleAxisf dispTF(azimuth, Eigen::Vector3f(0, 0, 1));
+	unitDisp = base_.tfVector(unitDisp);
 
 	base_.stepGroup(unitDisp, stepT, sGroupVec[0], 20.f);
 	base_.vel_.linear_ = unitDisp / stepT / 2;

@@ -171,11 +171,11 @@ void Parser::parseLine(const Line& line) const {
 		case 'L':
 			switch(it->moveType_) {
 			case 'S':
-				_hexapod.base_.stepGroup(newVec, line.time_, it->members_, 40.f);
+				_hexapod.base_.stepGroup(_hexapod.base_.tfVector(newVec), line.time_, it->members_, 40.f);
 				break;
 			case 'M':
 				//if not absolute
-				_hexapod.base_.addRelMovementGroup(newVec, line.time_, it->members_);
+				_hexapod.base_.addRelMovementGroup(_hexapod.base_.tfVector(newVec), line.time_, it->members_);
 				break;
 			}
 			break;

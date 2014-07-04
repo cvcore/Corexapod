@@ -90,6 +90,7 @@ public:
 	Plane(const char *paramFilePath = NULL);
 	~Plane();
 	Eigen::Vector3f projection(const Eigen::Vector3f& point) const;
+	Eigen::Vector3f tfVector(const Eigen::Vector3f& world);
 	void rotate(float roll, float pitch, float yaw, int time = 500);
 	void rotate(const Eigen::Vector3f& newNormal, const Eigen::Vector3f& newFront, int time = 500);
 	void rotateNorm(const Eigen::Vector3f& newNormal, int time = 500);
