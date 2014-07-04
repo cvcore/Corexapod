@@ -574,7 +574,7 @@ void Hexapod::sitDance() {
 	this->syncServoWithDelay(1500);
 
 	for(int i = 0; i < 6; i++) {
-		base_.leg_[i]->_servo[2]->setAngle(170);
+		base_.leg_[i]->_servo[2]->setAngle(170 / 180 * PI);
 		base_.leg_[i]->_servo[0]->_changed = true;
 		base_.leg_[i]->_servo[2]->_actTime = 600;
 	}
@@ -582,28 +582,28 @@ void Hexapod::sitDance() {
 
 
 	for(int i = 0; i < 6; i++) {
-			base_.leg_[i]->_servo[0]->setAngle(30);
+			base_.leg_[i]->_servo[0]->setAngle(30 / 180 * PI);
 			base_.leg_[i]->_servo[0]->_changed = true;
 			base_.leg_[i]->_servo[0]->_actTime = 1000;
 	}
 	this->syncServoWithDelay(1000);
 
 	for(int i = 0; i < 6; i++) {
-		base_.leg_[i]->_servo[0]->setAngle(-30);
+		base_.leg_[i]->_servo[0]->setAngle(-30 / 180 * PI);
 		base_.leg_[i]->_servo[0]->_changed = true;
 		base_.leg_[i]->_servo[0]->_actTime = 1000;
 	}
 	this->syncServoWithDelay(1000);
 
 	for(int i = 0; i < 6; i++) {
-			base_.leg_[i]->_servo[0]->setAngle(30);
+			base_.leg_[i]->_servo[0]->setAngle(30 / 180 * PI);
 			base_.leg_[i]->_servo[0]->_changed = true;
 			base_.leg_[i]->_servo[0]->_actTime = 1000;
 	}
 	this->syncServoWithDelay(1000);
 
 	for(int i = 0; i < 6; i++) {
-		base_.leg_[i]->_servo[0]->setAngle(-30);
+		base_.leg_[i]->_servo[0]->setAngle(-30 / 180 * PI);
 		base_.leg_[i]->_servo[0]->_changed = true;
 		base_.leg_[i]->_servo[0]->_actTime = 1000;
 	}
