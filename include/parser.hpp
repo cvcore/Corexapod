@@ -37,6 +37,8 @@ extern "C" {
 
 namespace qi = boost::spirit::qi;
 
+const float PI = 3.14159265359f;
+
 namespace hex {
 
 struct Group {
