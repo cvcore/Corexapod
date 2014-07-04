@@ -567,3 +567,8 @@ void Hexapod::rotateBodyAround(const Eigen::Vector3f& rotStartNorm, int totalT) 
 	usleep(totalT / prec * 1000);
 	//currNorm cannot rotate to over 2 * pi ?
 }
+
+void Hexapod::syncWithServoDelay(int delayms) {
+	base_.writeSerial(uart_);
+	usleep(delayms * 1000);
+}

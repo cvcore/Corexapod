@@ -115,6 +115,7 @@ public:
 	void moveAngular(float unitAngularDisp, int stepT, int count = 1);
 	void calibrate();
 	void rotateBodyAround(const Eigen::Vector3f& rotStartNorm, int totalT);
+	void syncServoWithDelay(int delayms);
 
 	Plane base_;
 	Serial uart_;

@@ -145,14 +145,15 @@ void Parser::parseLine(const Line& line) const {
 			switch(it->moveType_) {
 			case 'N':
 				_hexapod.base_.rotateNorm(newVec, line.time_);
+				_hexapod.syncServoWithDelay(line.time_);
 				break;
 			case 'F':
 				_hexapod.base_.rotateFront(newVec, line.time_);
+				_hexapod.syncServoWithDelay(line.time_);
 				break;
 			case 'O':
 				_hexapod.base_.translate(_hexapod.base_.origin_ + newVec, line.time_);
-				_hexapod.base_.writeSerial(_hexapod.uart_);
-				usleep(line.time_);
+				_hexapod.syncServoWithDelay(line.time_);
 				break;
 			case 'f':
 				_hexapod.rotateBodyAround(newVec, line.time_);
