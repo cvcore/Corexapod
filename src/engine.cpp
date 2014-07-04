@@ -555,7 +555,7 @@ void Hexapod::calibrate() {
 void Hexapod::rotateBody(const Eigen::Vector3f& rotStartDir, int totalT) {
 	const int prec = 10;
 	Eigen::Vector3f currNorm(rotStartDir);
-	Eigen::AngleAxisf aa(PI / prec, Eigen::Vector3f(0, 0, 1));
+	Eigen::AngleAxisf aa(PI * 2 / prec, Eigen::Vector3f(0, 0, 1));
 	for(int i = 0; i <= prec; i++) {
 		base_.rotateNorm(currNorm, totalT / (prec + 1));
 		base_.writeSerial(uart_);
