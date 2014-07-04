@@ -186,7 +186,7 @@ void Parser::parseLine(const Line& line) const {
 			case 'A':
 				int legIdx = it->members_[0], servoIdx = it->members_[1];
 				Servo* pServo = _hexapod.base_.getServo(legIdx, servoIdx);
-				pServo->setAngle(it->x_ / 180.f);
+				pServo->setAngle(it->x_ / 180.f * PI);
 				pServo->setActTime(line.time_);
 			}
 			break;
