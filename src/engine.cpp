@@ -358,10 +358,10 @@ Eigen::Vector3f Plane::projection(const Eigen::Vector3f& point) const {
 
 Eigen::Vector3f Plane::tfVector(const Eigen::Vector3f& world) {
 	Eigen::Vector3f result, unitz(Eigen::Vector3f::UnitZ()), rUnitx;
-	Eigen::AngleAxisf aa1(rotationAngle(unitz, normal_), unitz.cross(normal_).normalized()), aa2;
+	Eigen::AngleAxisf aa1(rotationAngle(unitz, normal_), (unitz.cross(normal_)).normalized()), aa2;
 	rUnitx = aa1 * Eigen::Vector3f(1, 0, 0);
-	aa2 = Eigen::AngleAxisf(rotationAngle(rUnitx, front_), rUnitx.cross(front_).normalized());
-	return (aa1 * (aa2 * world));
+	aa2 = Eigen::AngleAxisf(rotationAngle(rUnitx, front_), (rUnitx.cross(front_)).normalized());
+	return (aa2 * (aa1 * world));
 }
 
 void Plane::translate(const Eigen::Vector3f& newOrigin, int time) {
