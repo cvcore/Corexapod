@@ -137,6 +137,8 @@ bool Parser::act(const std::string& methodName) {
 void Parser::parseLine(const Line& line) const {
 	std::vector<Group>::const_iterator it;
 	bool baseLine = false;
+	if(line.empty_)
+		usleep(line.time_ * 1000);
 	for(it = line.group_.begin(); it != line.group_.end(); it++) {
 		Eigen::Vector3f newVec(it->x_, it->y_, it->z_);
 		switch(it->groupType_) {
@@ -175,13 +177,13 @@ void Parser::parseLine(const Line& line) const {
 	}
 	if(baseLine) {
 		_hexapod.base_.writeSerial(_hexapod.uart_);
+		::usleep(line.time_ * 1000);
 	} else {
 		_hexapod.parseMovement();
 		const int allMembers[6] = {0, 1, 2, 3, 4, 5};
 		std::vector<int> allMembersVec(allMembers, allMembers + 6);
 		_hexapod.base_.resetMovementGroup(allMembersVec);
 	}
-	::usleep(line.time_ * 1000);
 }
 
 }
