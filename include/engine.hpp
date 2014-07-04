@@ -114,7 +114,7 @@ public:
 	void moveLinear(Eigen::Vector3f unitDisp, int stepT, int count = 1);
 	void moveAngular(float unitAngularDisp, int stepT, int count = 1);
 	void calibrate();
-	void waveFrontLegs(int totalT);
+	void rotateBody(const Eigen::Vector3f& rotStartDir, int totalT);
 
 	Plane base_;
 	Serial uart_;

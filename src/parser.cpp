@@ -155,6 +155,8 @@ void Parser::parseLine(const Line& line) const {
 			case 'O':
 				_hexapod.base_.translate(_hexapod.base_.origin_ + newVec, line.time_);
 				break;
+			case 'f':
+				_hexapod.rotateBody(newVec, line.time_);
 			default:
 				std::cout << "[Parser] Invalid move type.\n";
 			}

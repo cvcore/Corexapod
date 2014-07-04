@@ -8,9 +8,6 @@
 #ifndef SERIAL_HPP_
 #define SERIAL_HPP_
 
-#ifdef TEST
-#include <iostream>
-#endif
 
 extern "C" {
 #include <unistd.h>
