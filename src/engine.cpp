@@ -562,5 +562,8 @@ void Hexapod::rotateBody(const Eigen::Vector3f& rotStartDir, int totalT) {
 		usleep(totalT / prec * 1000);
 		currNorm = aa * currNorm;
 	}
+	base_.rotateNorm(rotStartDir, totalT / prec);
+	base_.writeSerial(uart_);
+	usleep(totalT / prec * 1000);
 	//currNorm cannot rotate to over 2 * pi ?
 }
