@@ -139,9 +139,6 @@ void Parser::parseLine(const Line& line) const {
 	bool baseLine = false;
 	for(it = line.group_.begin(); it != line.group_.end(); it++) {
 		Eigen::Vector3f newVec(it->x_, it->y_, it->z_);
-		if(line.empty_) {
-			::usleep(line.time_ * 1000);
-		}
 		switch(it->groupType_) {
 		case 'B' :
 			baseLine = true;
@@ -154,6 +151,8 @@ void Parser::parseLine(const Line& line) const {
 				break;
 			case 'O':
 				_hexapod.base_.translate(_hexapod.base_.origin_ + newVec, line.time_);
+				_hexapod.base_.writeSerial(_hexapod.uart_);
+				usleep(line.time_);
 				break;
 			case 'f':
 				_hexapod.rotateBodyAround(newVec, line.time_);
@@ -176,10 +175,7 @@ void Parser::parseLine(const Line& line) const {
 			break;
 		}
 	}
-	if(baseLine) {
-		_hexapod.base_.writeSerial(_hexapod.uart_);
-//		::usleep(line.time_ * 1000);
-	} else {
+	if(!baseLine) {
 		_hexapod.parseMovement();
 		const int allMembers[6] = {0, 1, 2, 3, 4, 5};
 		std::vector<int> allMembersVec(allMembers, allMembers + 6);
