@@ -19,6 +19,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <boost/lambda/lambda.hpp>
 #include "serial.hpp"
 //#include "parser.hpp"
 
@@ -28,6 +29,7 @@ typedef enum { left, right } SideType;
 
 class Plane;
 class Leg;
+class Hexapod;
 
 struct Movement {
 	Movement(const Eigen::Vector3f& position, int deltaT) : position_(position), deltaT_(deltaT) {}
@@ -51,6 +53,7 @@ public:
 	int getPW();
 	friend class Leg;
 	friend class Plane;
+	friend class Hexapod;
 private:
 	int _minPW, _maxPW, _curPW, _actTime, _number, _jointType;
 	float _angle;
@@ -116,6 +119,7 @@ public:
 	void calibrate();
 	void rotateBodyAround(const Eigen::Vector3f& rotStartNorm, int totalT);
 	void syncServoWithDelay(int delayms);
+	void sitDance();
 
 	Plane base_;
 	Serial uart_;

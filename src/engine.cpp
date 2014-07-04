@@ -568,6 +568,56 @@ void Hexapod::rotateBodyAround(const Eigen::Vector3f& rotStartNorm, int totalT) 
 	//currNorm cannot rotate to over 2 * pi ?
 }
 
+void Hexapod::sitDance() {
+	typedef Eigen::Vector3f v3f;
+	base_.translate(v3f(0, 0, 20), 600);
+	this->syncServoWithDelay(600);
+	for(int i = 0; i < 6; i++) {
+		base_.leg_[i]->_servo[2]->setAngle(10);
+		base_.leg_[i]->_servo[2]->_actTime = 600;
+	}
+	this->syncServoWithDelay(600);
+
+	for(int i = 0; i < 6; i++) {
+			base_.leg_[i]->_servo[1]->setAngle(70);
+			base_.leg_[i]->_servo[1]->_actTime = 600;
+	}
+	this->syncServoWithDelay(600);
+
+	for(int i = 0; i < 6; i++) {
+			base_.leg_[i]->_servo[0]->setAngle(30);
+			base_.leg_[i]->_servo[0]->_actTime = 1000;
+	}
+	this->syncServoWithDelay(1000);
+
+	for(int i = 0; i < 6; i++) {
+		base_.leg_[i]->_servo[0]->setAngle(-30);
+		base_.leg_[i]->_servo[0]->_actTime = 1000;
+	}
+	this->syncServoWithDelay(1000);
+
+	for(int i = 0; i < 6; i++) {
+			base_.leg_[i]->_servo[0]->setAngle(30);
+			base_.leg_[i]->_servo[0]->_actTime = 1000;
+	}
+	this->syncServoWithDelay(1000);
+
+	for(int i = 0; i < 6; i++) {
+		base_.leg_[i]->_servo[0]->setAngle(-30);
+		base_.leg_[i]->_servo[0]->_actTime = 1000;
+	}
+	this->syncServoWithDelay(1000);
+
+	for(int i = 0; i < 6; i++) {
+			base_.leg_[i]->_servo[0]->setAngle(0);
+			base_.leg_[i]->_servo[0]->_actTime = 500;
+	}
+	this->syncServoWithDelay(500);
+
+	base_.translate(v3f(0, 0, initHeight), 600);
+	this->syncServoWithDelay(600);
+}
+
 void Hexapod::syncServoWithDelay(int delayms) {
 	base_.writeSerial(uart_);
 	usleep(delayms * 1000);
