@@ -17,8 +17,10 @@ namespace qi = boost::spirit::qi;
 
 int main() {
 	hex::Hexapod hexapod;
+	std::string method;
 	hex::Parser p("src/actions.as", hexapod);
 	std::cout << p;
-	p.act(std::string("waveFrontLegs"));
+	std::cin >> method;
+	p.act(method);
 	return 0;
 }
