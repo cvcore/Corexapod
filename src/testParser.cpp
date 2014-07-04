@@ -21,7 +21,7 @@ int main() {
 	hex::Parser p("src/actions.as", hexapod);
 //	hexapod.sitDance();
 	std::cout << p;
-//	std::cin >> method;
-	p.act("sitDance");
+	std::cin >> method;
+	p.act(method);
 	return 0;
 }
