@@ -178,7 +178,7 @@ void Parser::parseLine(const Line& line) const {
 	}
 	if(baseLine) {
 		_hexapod.base_.writeSerial(_hexapod.uart_);
-		::usleep(line.time_ * 1000);
+//		::usleep(line.time_ * 1000);
 	} else {
 		_hexapod.parseMovement();
 		const int allMembers[6] = {0, 1, 2, 3, 4, 5};
