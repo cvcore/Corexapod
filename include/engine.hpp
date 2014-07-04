@@ -50,6 +50,7 @@ public:
 	void calibrate(Serial& serial);
 	void setPW(int pw);
 	void setAngle(float angle);
+	void setActTime(int timems);
 	int getPW();
 	friend class Leg;
 	friend class Plane;
@@ -101,6 +102,7 @@ public:
 	void resetMovementGroup(const std::vector<int>& group);
 	void writeSerial(Serial& serial);
 	void calibrate(Serial& serial);
+	Servo* getServo(int legIdx, int servoIdx);
 
 	Leg* leg_[6];
 	Eigen::Vector3f origin_, normal_, front_; //both normal_ and front_ should be normalized

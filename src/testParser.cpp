@@ -19,8 +19,9 @@ int main() {
 	hex::Hexapod hexapod;
 	std::string method;
 	hex::Parser p("src/actions.as", hexapod);
+//	hexapod.sitDance();
 	std::cout << p;
-	std::cin >> method;
-	p.act(method);
+//	std::cin >> method;
+	p.act("sitDance");
 	return 0;
 }

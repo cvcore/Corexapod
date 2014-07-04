@@ -23,6 +23,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 	(std::vector<hex::Group>, group_)
 	(int, time_)
 	(bool, empty_)
+	(bool, absolute_)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -52,12 +53,13 @@ struct ActionScriptParser : qi::grammar<Iterator, ActionScript(), qi::space_type
 		mem_ %= '[' >> (int_ % ',') >> ']';
 //		vec3f_ = float_[ref(x) = _1] >> ',' >> float_[ref(y) = _1] >> ',' >> float_[ref(z) = _1] >> eps[_val = Eigen::Vector3f(ref(x), ref(y), ref(z))];
 
-		grp_ = ( char_('L')[at_c<0>(_val) = qi::_1] >> mem_[at_c<1>(_val) = qi::_1] | char_('B')[at_c<0>(_val) = qi::_1] )
+		grp_ = (( char_("L")[at_c<0>(_val) = qi::_1] >> mem_[at_c<1>(_val) = qi::_1] | char_('B')[at_c<0>(_val) = qi::_1] )
 				>> char_[at_c<2>(_val) = qi::_1]
-				>> '(' >> float_[at_c<3>(_val) = qi::_1 ] >> ',' >> float_[at_c<4>(_val) = qi::_1 ] >> ',' >> float_[at_c<5>(_val) = qi::_1 ] >> ')';
+				>> '(' >> float_[at_c<3>(_val) = qi::_1 ] >> ',' >> float_[at_c<4>(_val) = qi::_1 ] >> ',' >> float_[at_c<5>(_val) = qi::_1 ] >> ')')
+			    | char_("V")[at_c<0>(_val) = qi::_1] >> mem_[at_c<1>(_val) = qi::_1] >> char_[at_c<2>(_val) = qi::_1] >> float_[at_c<3>(_val) = qi::_1];
 
 		line_ = (lit("NOP")[at_c<2>(_val) = true] |
-				+grp_[push_back(at_c<0>(_val), qi::_1), at_c<2>(_val) = false]) >> char_('T') >> int_[at_c<1>(_val) = qi::_1];
+				+grp_[push_back(at_c<0>(_val), qi::_1), at_c<2>(_val) = false]) >> char_('T') >> int_[at_c<1>(_val) = qi::_1] >> -lit('$')[at_c<3>(_val) = true];
 
 		blk_ = +(char_ - "{")[at_c<0>(_val) += _1]
 		         >> '{'
@@ -137,6 +139,7 @@ bool Parser::act(const std::string& methodName) {
 void Parser::parseLine(const Line& line) const {
 	std::vector<Group>::const_iterator it;
 	bool baseLine = false;
+	bool servoLine = false;
 	for(it = line.group_.begin(); it != line.group_.end(); it++) {
 		Eigen::Vector3f newVec(it->x_, it->y_, it->z_);
 		switch(it->groupType_) {
@@ -152,7 +155,9 @@ void Parser::parseLine(const Line& line) const {
 				_hexapod.syncServoWithDelay(line.time_);
 				break;
 			case 'O':
-				_hexapod.base_.translate(_hexapod.base_.origin_ + newVec, line.time_);
+				if(!line.absolute_)
+					newVec = newVec + _hexapod.base_.origin_;
+				_hexapod.base_.translate(newVec, line.time_);
 				_hexapod.syncServoWithDelay(line.time_);
 				break;
 			case 'f':
@@ -174,9 +179,22 @@ void Parser::parseLine(const Line& line) const {
 				break;
 			}
 			break;
+
+		case 'V':
+			servoLine = true;
+			switch(it->moveType_) {
+			case 'A':
+				int legIdx = it->members_[0], servoIdx = it->members_[1];
+				Servo* pServo = _hexapod.base_.getServo(legIdx, servoIdx);
+				pServo->setAngle(it->x_ / 180.f);
+				pServo->setActTime(line.time_);
+			}
+			break;
 		}
 	}
-	if(!baseLine) {
+	if(servoLine) {
+		_hexapod.syncServoWithDelay(line.time_);
+	} else if(!baseLine) {
 		_hexapod.parseMovement();
 		const int allMembers[6] = {0, 1, 2, 3, 4, 5};
 		std::vector<int> allMembersVec(allMembers, allMembers + 6);

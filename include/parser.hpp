@@ -50,7 +50,7 @@ struct Group {
 struct Line {
 	std::vector<Group> group_;
 	int time_;
-	bool empty_;
+	bool empty_, absolute_;
 };
 
 struct Block {

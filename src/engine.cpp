@@ -102,6 +102,10 @@ void Servo::setAngle(float angle) {
 	this->setPW((_maxPW - _minPW) * _angle / PI + _minPW);
 }
 
+void Servo::setActTime(int timems) {
+	_actTime = timems;
+}
+
 Leg::Leg(SideType side, const Eigen::Vector3f& origin, const Eigen::Vector3f& pos, const std::vector<int>& servoNumberVec, const Plane& refPlane)
 : _origin(origin), _initOrigin(origin), _pos(pos), _side(side), _refPlane(refPlane) {
 	int sIdx;
@@ -429,6 +433,10 @@ void Plane::resetMovementGroup(const std::vector<int>& group) {
 		leg_[*it]->resetMovement();
 }
 
+Servo* Plane::getServo(int legIdx, int servoIdx) {
+	return leg_[legIdx]->_servo[servoIdx];
+}
+
 Hexapod::Hexapod() : uart_("/dev/ttyAMA0"), base_("calib.param"), _actionFileContentsAvailiable(false) {
 }
 
@@ -574,45 +582,88 @@ void Hexapod::sitDance() {
 	this->syncServoWithDelay(1500);
 
 	for(int i = 0; i < 6; i++) {
-		base_.leg_[i]->_servo[2]->setAngle(170 / 180 * PI);
+		base_.leg_[i]->_servo[0]->setAngle(170.f / 180 * PI);
 		base_.leg_[i]->_servo[0]->_changed = true;
-		base_.leg_[i]->_servo[2]->_actTime = 600;
+		base_.leg_[i]->_servo[0]->_actTime = 600;
+	}
+	this->syncServoWithDelay(600);
+
+	for(int i = 0; i < 6; i++) {
+		base_.leg_[i]->_servo[0]->setAngle(170.f / 180 * PI);
+		base_.leg_[i]->_servo[0]->_changed = true;
+		base_.leg_[i]->_servo[0]->_actTime = 600;
+	}
+	this->syncServoWithDelay(600);
+
+	for(int i = 0; i < 6; i++) {
+		base_.leg_[i]->_servo[0]->setAngle(170.f / 180 * PI);
+		base_.leg_[i]->_servo[0]->_changed = true;
+		base_.leg_[i]->_servo[0]->_actTime = 600;
+	}
+	this->syncServoWithDelay(600);
+
+	for(int i = 0; i < 6; i++) {
+		base_.leg_[i]->_servo[0]->setAngle(170.f / 180 * PI);
+		base_.leg_[i]->_servo[0]->_changed = true;
+		base_.leg_[i]->_servo[0]->_actTime = 600;
+	}
+	this->syncServoWithDelay(600);
+
+	for(int i = 0; i < 6; i++) {
+		base_.leg_[i]->_servo[0]->setAngle(170.f / 180 * PI);
+		base_.leg_[i]->_servo[0]->_changed = true;
+		base_.leg_[i]->_servo[0]->_actTime = 600;
+	}
+	this->syncServoWithDelay(600);
+
+	for(int i = 0; i < 6; i++) {
+		base_.leg_[i]->_servo[0]->setAngle(170.f / 180 * PI);
+		base_.leg_[i]->_servo[0]->_changed = true;
+		base_.leg_[i]->_servo[0]->_actTime = 600;
 	}
 	this->syncServoWithDelay(600);
 
 
 	for(int i = 0; i < 6; i++) {
-			base_.leg_[i]->_servo[0]->setAngle(30 / 180 * PI);
-			base_.leg_[i]->_servo[0]->_changed = true;
-			base_.leg_[i]->_servo[0]->_actTime = 1000;
+		base_.leg_[i]->_servo[1]->setAngle(70.f / 180 * PI);
+		base_.leg_[i]->_servo[1]->_changed = true;
+		base_.leg_[i]->_servo[1]->_actTime = 600;
+	}
+	this->syncServoWithDelay(600);
+
+
+	for(int i = 0; i < 6; i++) {
+			base_.leg_[i]->_servo[2]->setAngle(30.f / 180 * PI);
+			base_.leg_[i]->_servo[2]->_changed = true;
+			base_.leg_[i]->_servo[2]->_actTime = 1000;
 	}
 	this->syncServoWithDelay(1000);
 
 	for(int i = 0; i < 6; i++) {
-		base_.leg_[i]->_servo[0]->setAngle(-30 / 180 * PI);
-		base_.leg_[i]->_servo[0]->_changed = true;
-		base_.leg_[i]->_servo[0]->_actTime = 1000;
+		base_.leg_[i]->_servo[2]->setAngle(-30 / 180 * PI);
+		base_.leg_[i]->_servo[2]->_changed = true;
+		base_.leg_[i]->_servo[2]->_actTime = 1000;
 	}
 	this->syncServoWithDelay(1000);
 
 	for(int i = 0; i < 6; i++) {
-			base_.leg_[i]->_servo[0]->setAngle(30 / 180 * PI);
-			base_.leg_[i]->_servo[0]->_changed = true;
-			base_.leg_[i]->_servo[0]->_actTime = 1000;
+		base_.leg_[i]->_servo[2]->setAngle(30 / 180 * PI);
+		base_.leg_[i]->_servo[2]->_changed = true;
+		base_.leg_[i]->_servo[2]->_actTime = 1000;
 	}
 	this->syncServoWithDelay(1000);
 
 	for(int i = 0; i < 6; i++) {
-		base_.leg_[i]->_servo[0]->setAngle(-30 / 180 * PI);
-		base_.leg_[i]->_servo[0]->_changed = true;
-		base_.leg_[i]->_servo[0]->_actTime = 1000;
+		base_.leg_[i]->_servo[2]->setAngle(-30 / 180 * PI);
+		base_.leg_[i]->_servo[2]->_changed = true;
+		base_.leg_[i]->_servo[2]->_actTime = 1000;
 	}
 	this->syncServoWithDelay(1000);
 
 	for(int i = 0; i < 6; i++) {
-			base_.leg_[i]->_servo[0]->setAngle(0);
-			base_.leg_[i]->_servo[0]->_changed = true;
-			base_.leg_[i]->_servo[0]->_actTime = 500;
+		base_.leg_[i]->_servo[2]->setAngle(0);
+		base_.leg_[i]->_servo[2]->_changed = true;
+		base_.leg_[i]->_servo[2]->_actTime = 500;
 	}
 	this->syncServoWithDelay(500);
 
