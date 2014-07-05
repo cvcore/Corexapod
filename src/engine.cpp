@@ -16,7 +16,23 @@ const float leg1Len = 140.801278;
 const float leg2Len = 86.0;
 
 float rotationAngle(const Eigen::Vector3f& a, const Eigen::Vector3f& b) {
-	return acosf(a.dot(b) / (a.norm() * b.norm()));
+	float result = a.dot(b);
+	if(result != 0.f)
+		result /= (a.norm() * b.norm());
+	return acosf(result);
+}
+
+Eigen::Vector3f rotByVec(const Eigen::Vector3f& vec1, const Eigen::Vector3f& vec2, const Eigen::Vector3f& oldvec) {
+	Eigen::Vector3f newvec;
+	float rotAng = rotationAngle(vec1, vec2);
+	if(rotAng == 0.f)
+		return newvec = oldvec;
+	else {
+		Eigen::Vector3f rotaxis(vec1.cross(vec2).normalized());
+		Eigen::AngleAxisf aa(rotAng, rotaxis);
+		newvec = aa * oldvec;
+	}
+	return newvec;
 }
 
 Servo::Servo(int jointType, SideType side, int number) {
@@ -357,11 +373,19 @@ Eigen::Vector3f Plane::projection(const Eigen::Vector3f& point) const {
 }
 
 Eigen::Vector3f Plane::tfVector(const Eigen::Vector3f& world) {
-	Eigen::Vector3f result, unitz(Eigen::Vector3f::UnitZ()), rUnitx;
-	Eigen::AngleAxisf aa1(rotationAngle(unitz, normal_), (unitz.cross(normal_)).normalized()), aa2;
-	rUnitx = aa1 * Eigen::Vector3f(1, 0, 0);
-	aa2 = Eigen::AngleAxisf(rotationAngle(rUnitx, front_), (rUnitx.cross(front_)).normalized());
-	return (aa2 * (aa1 * world));
+	Eigen::Vector3f result, rUnitx;
+//	rot1 = unitz.cross(normal_);
+//	rot1.normalize();
+//	Eigen::AngleAxisf aa1(rotationAngle(unitz, normal_), rot1), aa2;
+//	rUnitx = aa1 * unitx;
+//	rot2 = rUnitx.cross(front_);
+//	rot2.normalize();
+//	aa2 = Eigen::AngleAxisf(rotationAngle(rUnitx, front_), rot2);
+//	return (aa2 * (aa1 * world));
+	result = rotByVec(Eigen::Vector3f::UnitZ(), normal_, world);
+	rUnitx = rotByVec(Eigen::Vector3f::UnitZ(), normal_, Eigen::Vector3f::UnitX());
+	result = rotByVec(rUnitx, front_, result);
+	return result;
 }
 
 void Plane::translate(const Eigen::Vector3f& newOrigin, int time) {
