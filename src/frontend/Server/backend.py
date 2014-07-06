@@ -16,9 +16,9 @@ class index:
 
 class act:
     def GET(self, name):
-		    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		    s.connect((HOST, PORT))
-		    s.send(name);
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect((HOST, PORT))
+            s.send(name);
         while 1:
             szBuf = s.recv(1024);
             if data_rec:
