@@ -11,7 +11,8 @@ using namespace hex;
 using namespace std;
 
 const float PI = 3.14159265359f;
-const float initHeight = 29.0f + 140.801278f;
+//const float initHeight = 29.0f + 140.801278f;
+const float initHeight = 120;
 const float leg1Len = 140.801278;
 const float leg2Len = 86.0;
 
@@ -382,8 +383,8 @@ Eigen::Vector3f Plane::tfVector(const Eigen::Vector3f& world) {
 //	rot2.normalize();
 //	aa2 = Eigen::AngleAxisf(rotationAngle(rUnitx, front_), rot2);
 //	return (aa2 * (aa1 * world));
-	result = rotByVec(Eigen::Vector3f::UnitZ(), normal_, world);
-	rUnitx = rotByVec(Eigen::Vector3f::UnitZ(), normal_, Eigen::Vector3f::UnitX());
+	result = rotByVec(Eigen::Vector3f(0, 0, 1), normal_, world);
+	rUnitx = rotByVec(Eigen::Vector3f(0, 0, 1), normal_, Eigen::Vector3f(1, 0, 0));
 	result = rotByVec(rUnitx, front_, result);
 	return result;
 }

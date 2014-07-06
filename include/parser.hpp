@@ -12,6 +12,7 @@
 #include <iostream>
 #include <iterator>
 #include <string>
+#include <sstream>
 #include <streambuf>
 #include <map>
 #include <utility>
@@ -71,6 +72,7 @@ public:
 	bool act(const std::string& methodName);
 	friend std::ostream& operator<<(std::ostream& os, const Parser& p);
 	void parseLine(const Line& line) const;
+	std::string parseSocket(const std::string& socketStr);
 
 private:
 	void buildIndex();

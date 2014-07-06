@@ -38,6 +38,7 @@ set( LIB_SRC
     src/engine.cpp
     src/serial.cpp
     src/parser.cpp
+    src/frontend/daemon.cpp
 )
 
 add_library( corexapod SHARED ${LIB_SRC} )
@@ -46,5 +47,8 @@ target_link_libraries( corexapod ${Boost_LIBRARIES})
 #add_executable( test src/test.cpp )
 #target_link_libraries( test corexapod )
 
-add_executable( testParser src/testParser.cpp )
-target_link_libraries( testParser corexapod )
+#add_executable( testParser src/testParser.cpp )
+#target_link_libraries( testParser corexapod )
+
+add_executable( cdm src/app/corexapod.cpp )
+target_link_libraries( cdm corexapod )

@@ -136,6 +136,47 @@ bool Parser::act(const std::string& methodName) {
 	return true;
 }
 
+std::string Parser::parseSocket(const std::string& socketStr) {
+	std::stringstream ss;
+	if(socketStr == "front") {
+		_hexapod.moveLinear(Eigen::Vector3f(65, 0, 0), 1000, 3);
+		ss << "success";
+	} else if(socketStr == "back") {
+		_hexapod.moveLinear(Eigen::Vector3f(-65, 0, 0), 1000, 3);
+		ss << "success";
+	} else if(socketStr == "up") {
+		if(_hexapod.base_.origin_.z() < 200) {
+			_hexapod.base_.translate(_hexapod.base_.origin_ + Eigen::Vector3f(0, 0, 20), 400);
+			_hexapod.syncServoWithDelay(400);
+		}
+		ss << "success";
+	} else if(socketStr == "down") {
+		if(_hexapod.base_.origin_.z() > 90) {
+			_hexapod.base_.translate(_hexapod.base_.origin_ + Eigen::Vector3f(0, 0, -20), 400);
+			_hexapod.syncServoWithDelay(400);
+		}
+		ss << "success";
+	} else if(socketStr == "left") {
+		_hexapod.moveAngular(PI / 10, 1000, 2);
+		ss << "success";
+	} else if(socketStr == "right") {
+		_hexapod.moveAngular(-PI / 10, 1000, 2);
+		ss << "success";
+	} else if(socketStr == "auto") { // todo
+		ss << "success";
+	} else if(socketStr == "poweroff") {
+		ss << "success";
+	} else if(socketStr == "reboot") {
+		ss << "success";
+	} else if(socketStr == "status") {
+		ss << "json {\"totalUseTime\":3000,\"powerCycle\":3,\"battery\",\"90%\"}";
+	} else {
+		this -> act(socketStr);
+		ss << "success";
+	}
+	return ss.str();
+}
+
 void Parser::parseLine(const Line& line) const {
 	std::vector<Group>::const_iterator it;
 	bool baseLine = false;
