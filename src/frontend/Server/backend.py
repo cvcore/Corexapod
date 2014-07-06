@@ -11,21 +11,21 @@ urls = (
 )
 
 class index:
-    def GET(self):
-        web.HTTPError('301', {'Location': 'static/'})
+  def GET(self):
+    web.HTTPError('301', {'Location': 'static/'})
 
 class act:
-    def GET(self, name):
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect((HOST, PORT))
-            s.send(name);
-        while 1:
-            szBuf = s.recv(1024);
-            if data_rec:
-                break
-        s.close();
-        return name;
+  def GET(self, name):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((HOST, PORT))
+    s.send(name);
+    while 1:
+      szBuf = s.recv(1024);
+      if data_rec:
+        break
+    s.close();
+    return name;
 
 if __name__ == "__main__":
-    app = web.application(urls, globals())
-    app.run()
+  app = web.application(urls, globals())
+  app.run()
