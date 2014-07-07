@@ -71,10 +71,12 @@ class Parser {
 public:
 	Parser(const char* scriptPath, Hexapod& hexapod);
 	bool act(const std::string& methodName);
+	void randomAct();
 	friend std::ostream& operator<<(std::ostream& os, const Parser& p);
 	void parseLine(const Line& line) const;
 	std::string parseSocket(const std::string& socketStr);
 
+	bool autoenable_;
 private:
 	void buildIndex();
 

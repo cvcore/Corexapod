@@ -17,6 +17,7 @@ extern "C" {
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <memory.h>
+#include <fcntl.h>
 }
 
 #include <iostream>
@@ -35,6 +36,7 @@ private:
 	struct sockaddr_in _serv_addr, _cli_addr;
 	int _portno, _sockfd;
 	Parser& _parser;
+	bool _nonblock;
 };
 
 }
