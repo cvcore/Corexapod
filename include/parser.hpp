@@ -16,6 +16,7 @@
 #include <streambuf>
 #include <map>
 #include <utility>
+#include <cstdlib>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_lexeme.hpp>
 #include <boost/spirit/include/qi_alternative.hpp>

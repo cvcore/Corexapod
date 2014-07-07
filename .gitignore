@@ -1,7 +1,5 @@
-<<<<<<< HEAD
 *.pyc
-=======
 bin
 lib
 build
->>>>>>> a8099f07f84bd47a51b8463b39bdb13c6dc0fb9e
+.DS_Store
