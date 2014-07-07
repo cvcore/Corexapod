@@ -188,16 +188,20 @@ void Parser::parseLine(const Line& line) const {
 			baseLine = true;
 			switch(it->moveType_) {
 			case 'N':
-				_hexapod.base_.rotateNorm(newVec, line.time_);
+				_hexapod.base_.rotateNorm(_hexapod.base_.tfVector(newVec), line.time_);
 				_hexapod.syncServoWithDelay(line.time_);
 				break;
 			case 'F':
-				_hexapod.base_.rotateFront(newVec, line.time_);
+				_hexapod.base_.rotateFront(_hexapod.base_.tfVector(newVec), line.time_);
 				_hexapod.syncServoWithDelay(line.time_);
 				break;
 			case 'O':
 				if(!line.absolute_)
-					newVec = newVec + _hexapod.base_.origin_;
+					newVec = _hexapod.base_.tfVector(newVec + _hexapod.base_.origin_);
+				else { //absolute value only to z axis
+					newVec(0) = _hexapod.base_(0);
+					newVec(1) = _hexapod.base_(1);
+				}
 				_hexapod.base_.translate(newVec, line.time_);
 				_hexapod.syncServoWithDelay(line.time_);
 				break;
