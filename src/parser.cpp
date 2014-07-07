@@ -199,8 +199,8 @@ void Parser::parseLine(const Line& line) const {
 				if(!line.absolute_)
 					newVec = _hexapod.base_.tfVector(newVec + _hexapod.base_.origin_);
 				else { //absolute value only to z axis
-					newVec(0) = _hexapod.base_(0);
-					newVec(1) = _hexapod.base_(1);
+					newVec(0) = _hexapod.base_.origin_(0);
+					newVec(1) = _hexapod.base_.origin_(1);
 				}
 				_hexapod.base_.translate(newVec, line.time_);
 				_hexapod.syncServoWithDelay(line.time_);
