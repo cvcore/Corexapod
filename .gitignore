@@ -8,3 +8,5 @@ bin
 lib
 build
 .DS_Store
+.settings
+src/test.cpp
