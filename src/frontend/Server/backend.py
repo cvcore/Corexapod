@@ -21,10 +21,10 @@ class act:
     s.send(name);
     while 1:
       szBuf = s.recv(1024);
-      if data_rec:
+      if szBuf:
         break
     s.close();
-    return name;
+    return szBuf;
 
 if __name__ == "__main__":
   app = web.application(urls, globals())
