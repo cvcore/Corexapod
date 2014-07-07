@@ -470,7 +470,7 @@ Servo* Plane::getServo(int legIdx, int servoIdx) {
 	return leg_[legIdx]->_servo[servoIdx];
 }
 
-Hexapod::Hexapod() : uart_("/dev/ttyAMA0"), base_("calib.param"), _actionFileContentsAvailiable(false) {
+Hexapod::Hexapod(const char* uart, const char* calibFile) : uart_(uart), base_(calibFile), _actionFileContentsAvailiable(false) {
 }
 
 void Hexapod::parseMovement() {

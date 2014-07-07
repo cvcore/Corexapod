@@ -10,7 +10,7 @@
 #include "parser.hpp"
 
 int main() {
-	hex::Hexapod hexapod;
+	hex::Hexapod hexapod("/dev/ttyAMA0", "src/calib.param");
 	hex::Parser p("src/actions.as", hexapod);
 	hex::Daemon d(50000, p);
 	d.spin();
