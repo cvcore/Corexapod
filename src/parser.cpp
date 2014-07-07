@@ -77,7 +77,7 @@ struct ActionScriptParser : qi::grammar<Iterator, ActionScript(), qi::space_type
 
 };
 
-Parser::Parser(const char* scriptPath, Hexapod& hexapod) : _hexapod(hexapod) {
+Parser::Parser(const char* scriptPath, Hexapod& hexapod) : _hexapod(hexapod), autoenable_(false) {
 	namespace qi = boost::spirit::qi;
 	if(scriptPath == NULL) {
 		std::cout << "[Parser] Empty file path.\n";
@@ -94,6 +94,7 @@ Parser::Parser(const char* scriptPath, Hexapod& hexapod) : _hexapod(hexapod) {
 	if(!qi::phrase_parse(begin, end, parser, qi::space, _as) || begin != end)
 		std::cout << "[Parser] Parse file: " << scriptPath << " failed.\n";
 	this->buildIndex();
+	std::srand(std::time(0)); //feed rand generator
 }
 
 void Parser::buildIndex() {
@@ -136,6 +137,13 @@ bool Parser::act(const std::string& methodName) {
 	return true;
 }
 
+void Parser::randomAct() {
+	int methodNo = std::rand() % (_index.size());
+	std::map<std::string, const Block&>::const_iterator it = _index.begin();
+	for(; methodNo > 0; methodNo--, it++);
+	this->act(it->first);
+}
+
 std::string Parser::parseSocket(const std::string& socketStr) {
 	std::stringstream ss;
 	if(socketStr == "front") {
@@ -145,13 +153,13 @@ std::string Parser::parseSocket(const std::string& socketStr) {
 		_hexapod.moveLinear(Eigen::Vector3f(-65, 0, 0), 1000, 3);
 		ss << "success";
 	} else if(socketStr == "up") {
-		if(_hexapod.base_.origin_.z() < 200) {
+		if(_hexapod.base_.origin_.z() < 210) {
 			_hexapod.base_.translate(_hexapod.base_.origin_ + Eigen::Vector3f(0, 0, 20), 400);
 			_hexapod.syncServoWithDelay(400);
 		}
 		ss << "success";
 	} else if(socketStr == "down") {
-		if(_hexapod.base_.origin_.z() > 90) {
+		if(_hexapod.base_.origin_.z() > 110) {
 			_hexapod.base_.translate(_hexapod.base_.origin_ + Eigen::Vector3f(0, 0, -20), 400);
 			_hexapod.syncServoWithDelay(400);
 		}
@@ -162,8 +170,18 @@ std::string Parser::parseSocket(const std::string& socketStr) {
 	} else if(socketStr == "right") {
 		_hexapod.moveAngular(-PI / 10, 1000, 2);
 		ss << "success";
-	} else if(socketStr == "auto") { // todo
+	} else if(socketStr == "turnLeft") {
+		_hexapod.moveLinear(Eigen::Vector3f(40, 40, 0), 1000, 3);
 		ss << "success";
+	} else if(socketStr == "turnRight") {
+		_hexapod.moveLinear(Eigen::Vector3f(40, -40, 0), 1000, 3);
+		ss << "success";
+	} else if(socketStr == "autoenable") { // todo
+		ss << "success";
+		autoenable_ = true;
+	} else if(socketStr == "autodisable") {
+		ss << "success";
+		autoenable_ = false;
 	} else if(socketStr == "poweroff") {
 		ss << "success";
 		std::system("shutdown -h now");
@@ -190,7 +208,7 @@ void Parser::parseLine(const Line& line) const {
 			baseLine = true;
 			switch(it->moveType_) {
 			case 'N':
-				_hexapod.base_.rotateNorm(_hexapod.base_.tfVector(newVec), line.time_);
+				_hexapod.base_.rotateNorm(newVec, line.time_);
 				_hexapod.syncServoWithDelay(line.time_);
 				break;
 			case 'F':
