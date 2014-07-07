@@ -169,7 +169,7 @@ std::string Parser::parseSocket(const std::string& socketStr) {
 	} else if(socketStr == "reboot") {
 		ss << "success";
 	} else if(socketStr == "status") {
-		ss << "{\"totalUseTime\":3000,\"powerCycle\":3,\"battery\",\"90%\"}";
+		ss << "{\"totalUseTime\":3000,\"powerCycle\":3,\"battery\":\"90%\"}";
 	} else {
 		this -> act(socketStr);
 		ss << "success";
