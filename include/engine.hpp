@@ -115,7 +115,7 @@ public:
 
 class Hexapod {
 public:
-	Hexapod();
+	Hexapod(const char* uart, const char* calibFile);
 	void parseMovement();
 	void moveLinear(Eigen::Vector3f unitDisp, int stepT, int count = 1);
 	void moveAngular(float unitAngularDisp, int stepT, int count = 1);

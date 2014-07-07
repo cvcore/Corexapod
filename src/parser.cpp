@@ -166,8 +166,10 @@ std::string Parser::parseSocket(const std::string& socketStr) {
 		ss << "success";
 	} else if(socketStr == "poweroff") {
 		ss << "success";
+		std::system("shutdown -h now");
 	} else if(socketStr == "reboot") {
 		ss << "success";
+		std::system("reboot");
 	} else if(socketStr == "status") {
 		ss << "{\"totalUseTime\":3000,\"powerCycle\":3,\"battery\":\"90%\"}";
 	} else {
