@@ -234,9 +234,10 @@ void Parser::parseLine(const Line& line) const {
 				_hexapod.syncServoWithDelay(line.time_);
 				break;
 			case 'O':
-				if(!line.absolute_)
-					newVec = _hexapod.base_.tfVector(newVec + _hexapod.base_.origin_);
-				else { //absolute value only to z axis
+				if(!line.absolute_) {
+					newVec = _hexapod.base_.tfVector(newVec);
+					newVec = newVec + _hexapod.base_.origin_;
+				} else { //absolute value only to z axis
 					newVec(0) = _hexapod.base_.origin_(0);
 					newVec(1) = _hexapod.base_.origin_(1);
 				}
