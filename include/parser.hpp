@@ -83,6 +83,7 @@ private:
 	Hexapod& _hexapod;
 	ActionScript _as;
 	std::map<std::string, const Block&> _index;
+	int _last;
 };
 
 }
