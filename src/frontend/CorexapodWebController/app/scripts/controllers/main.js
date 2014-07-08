@@ -29,7 +29,9 @@ angular.module('corexapodControllerApp')
       }
 
       jQuery('table a').addClass('disabled');
-      jQuery('#info').addClass('alert-warning');
+      jQuery('#info')
+        .addClass('alert-warning')
+        .text('用户指令执行中');
 
       $http.get(act)
         .success(function(data) {
