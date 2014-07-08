@@ -19,12 +19,16 @@ class act:
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((HOST, PORT))
     s.send(name);
-    while 1:
-      szBuf = s.recv(1024);
-      if szBuf:
-        break
-    s.close();
-    return szBuf;
+    if name == "/act/autoenable":
+      s.close();
+      return success;
+    else:
+      while 1:
+        szBuf = s.recv(1024);
+        if szBuf:
+          break
+      s.close();
+      return szBuf;
 
 if __name__ == "__main__":
   app = web.application(urls, globals())
