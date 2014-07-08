@@ -20,7 +20,7 @@ Daemon::Daemon(int portNumber, Parser& parser) : _portno(portNumber), _parser(pa
 	_serv_addr.sin_port = htons(_portno);
 
 	if (bind(_sockfd, (struct sockaddr *) &_serv_addr, sizeof(_serv_addr)) < 0)
-		std::cout << "ERROR on binding\n";
+		std::cout << "[Daemon] ERROR on binding\n";
 	listen(_sockfd, 5);
 }
 
@@ -33,8 +33,9 @@ void Daemon::spinOnce() {
 	struct sockaddr_in cli_addr;
 	socklen_t clilen = sizeof(cli_addr);
 	int newsockfd = accept(_sockfd, (struct sockaddr *) &cli_addr, &clilen);
-	if (newsockfd < 0 || read(newsockfd, buffer, 255) < 0)
-		std::cout << "[Daemon] Socket communication error\n";
+	if (newsockfd < 0 || read(newsockfd, buffer, 255)< 0)
+		if(!_nonblock)
+			std::cout << "[Daemon] Socket communication error\n";
 	std::cout << "[Debug] " << buffer << '\n';
 	std::string result = _parser.parseSocket(buffer);
 	write(newsockfd, result.c_str(), result.size());

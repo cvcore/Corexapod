@@ -132,6 +132,14 @@ std::ostream& operator<<(std::ostream& os, const Parser& p) {
 	return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const Plane& p) {
+	os << "[Debug][Plane]" <<'\n';
+	os << "\t Front:" << p.front_.x() << ' ' << p.front_.y() << ' ' << p.front_.z() << '\n'
+		<<"\t Normal:" << p.normal_.x() << ' ' << p.normal_.y() << ' ' << p.normal_.z() << '\n'
+		<<"\t Origin:" << p.origin_.x() << ' ' << p.origin_.y() << ' ' << p.origin_.z() << '\n';
+	return os;
+}
+
 bool Parser::act(const std::string& methodName) {
 	if(_index.count(methodName) == 0) {
 		std::cout << "[Parser] Method name not exist.\n";
@@ -209,7 +217,8 @@ void Parser::parseLine(const Line& line) const {
 	std::vector<Group>::const_iterator it;
 	bool baseLine = false;
 	bool servoLine = false;
-	std::cout << "[Parser][Debug]" << line << '\n';
+	std::cout << "[Parser][Debug] " << line << '\n';
+	std::cout << _hexapod.base_;
 	for(it = line.group_.begin(); it != line.group_.end(); it++) {
 		Eigen::Vector3f newVec(it->x_, it->y_, it->z_);
 		switch(it->groupType_) {
