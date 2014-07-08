@@ -77,7 +77,7 @@ struct ActionScriptParser : qi::grammar<Iterator, ActionScript(), qi::space_type
 
 };
 
-Parser::Parser(const char* scriptPath, Hexapod& hexapod) : _hexapod(hexapod), autoenable_(false) {
+Parser::Parser(const char* scriptPath, Hexapod& hexapod) : _hexapod(hexapod), autoenable_(false), _last(0) {
 	namespace qi = boost::spirit::qi;
 	if(scriptPath == NULL) {
 		std::cout << "[Parser] Empty file path.\n";
@@ -106,6 +106,18 @@ void Parser::buildIndex() {
 
 }
 
+std::ostream& operator<<(std::ostream &os, const Line& line) {
+	std::vector<Group>::const_iterator git;
+	for(git = line.group_.begin(); git != line.group_.end(); git++) {
+		os << git->groupType_ << '[';
+		for_each(git->members_.begin(), git->members_.end(), os << boost::lambda::_1 << ' ');
+		os << "] " << git->moveType_ << '(' << git->x_ << ',' << git->y_ << ',' << git->z_ << ") | ";
+
+	}
+	os << 'T' << line.time_ << '\n';
+	return os;
+}
+
 std::ostream& operator<<(std::ostream& os, const Parser& p) {
 	os << "Parsed: " << p._as.block_.size() << " blocks.\n";
 	std::vector<Block>::const_iterator bit;
@@ -114,14 +126,7 @@ std::ostream& operator<<(std::ostream& os, const Parser& p) {
 		std::vector<Line>::const_iterator lit;
 		for(lit = bit->line_.begin(); lit != bit->line_.end(); lit++) {
 			os << '\t';
-			std::vector<Group>::const_iterator git;
-			for(git = lit->group_.begin(); git != lit->group_.end(); git++) {
-				os << git->groupType_ << '[';
-				for_each(git->members_.begin(), git->members_.end(), os << boost::lambda::_1 << ' ');
-				os << "] " << git->moveType_ << '(' << git->x_ << ',' << git->y_ << ',' << git->z_ << ") | ";
-
-			}
-			os << 'T' << lit->time_ << '\n';
+			os << *lit;
 		}
 	}
 	return os;
@@ -138,7 +143,10 @@ bool Parser::act(const std::string& methodName) {
 }
 
 void Parser::randomAct() {
-	int methodNo = std::rand() % (_index.size());
+//	int methodNo = std::rand() % (_index.size());
+	_last = (_last + 1) % _index.size();
+	int methodNo  = _last;
+	std::cout << "[Parser] Auto: " << _last << '\n';
 	std::map<std::string, const Block&>::const_iterator it = _index.begin();
 	for(; methodNo > 0; methodNo--, it++);
 	this->act(it->first);
@@ -201,6 +209,7 @@ void Parser::parseLine(const Line& line) const {
 	std::vector<Group>::const_iterator it;
 	bool baseLine = false;
 	bool servoLine = false;
+	std::cout << "[Parser][Debug]" << line << '\n';
 	for(it = line.group_.begin(); it != line.group_.end(); it++) {
 		Eigen::Vector3f newVec(it->x_, it->y_, it->z_);
 		switch(it->groupType_) {
