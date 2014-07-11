@@ -200,12 +200,14 @@ std::string Parser::parseSocket(const std::string& socketStr) {
 		autoenable_ = false;
 	} else if(socketStr == "poweroff") {
 		ss << "success";
-		std::system("shutdown -h now");
+		_hexapod.power_.logicPower(poweroff);
 	} else if(socketStr == "reboot") {
 		ss << "success";
-		std::system("reboot");
+		_hexapod.power_.logicPower(restart);
 	} else if(socketStr == "status") {
-		ss << "{\"totalUseTime\":3000,\"powerCycle\":3,\"battery\":\"90%\"}";
+		ss << "{\"totalUseTime\":" << _hexapod.getTotalUseTime() << "," <<
+			  "\"powerCycle\":" << _hexapod.getPowerCycle() << "," <<
+			  "\"battery\":\"" << _hexapod.power_.readBatteryPercentage() << "%\"}";
 	} else {
 		this -> act(socketStr);
 		ss << "success";

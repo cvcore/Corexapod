@@ -9,7 +9,7 @@
 
 using namespace hex;
 
-Daemon::Daemon(int portNumber, Parser& parser) : _portno(portNumber), _parser(parser), _nonblock(false){
+Daemon::Daemon(int portNumber, Parser& parser) : _portno(portNumber), _parser(parser), _nonblock(false) {
 	_sockfd = socket(AF_INET, SOCK_STREAM, 0); //If the third argument is zero (and it always should be except for unusual circumstances), the operating system will choose the most appropriate protocol. It will choose TCP for stream sockets and UDP for datagram sockets.
 	if(_sockfd < 0)
 		std::cout << "[Daemon] ERROR opening socket\n";

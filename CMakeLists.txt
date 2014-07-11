@@ -39,10 +39,11 @@ set( LIB_SRC
     src/serial.cpp
     src/parser.cpp
     src/frontend/daemon.cpp
+    src/power.cpp
 )
 
-#add_library( corexapod SHARED ${LIB_SRC} )
-#target_link_libraries( corexapod ${Boost_LIBRARIES})
+add_library( foundation SHARED ${LIB_SRC} )
+target_link_libraries( foundation ${Boost_LIBRARIES} wiringPi)
 
 #add_executable( test src/test.cpp )
 #target_link_libraries( test corexapod )
@@ -50,11 +51,9 @@ set( LIB_SRC
 #add_executable( testParser src/testParser.cpp )
 #target_link_libraries( testParser corexapod )
 
-#add_executable( cdm src/app/corexapod.cpp )
-#target_link_libraries( cdm corexapod )
+add_executable( cdm src/app/corexapod.cpp )
+target_link_libraries( cdm foundation )
 
-add_library(power src/power.cpp)
-target_link_libraries(power wiringPi )
 
-add_executable( testPower src/testPower.cpp )
-target_link_libraries( testPower power wiringPi )
+#add_executable( testPower src/testPower.cpp )
+#target_link_libraries( testPower power wiringPi )

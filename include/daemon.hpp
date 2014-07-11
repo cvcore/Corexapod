@@ -21,6 +21,8 @@ extern "C" {
 }
 
 #include <iostream>
+#include <ctime>
+#include <fstream>
 #include "parser.hpp"
 #include "engine.hpp"
 

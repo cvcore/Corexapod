@@ -9,6 +9,7 @@
 #define POWER_HPP_
 
 #include <iostream>
+#include <cstdlib>
 
 /*
  * Note:
@@ -20,11 +21,15 @@
  *
  */
 
+enum LogicPowerAction {poweroff, restart, shutdown};
+enum ServoPowerAction {off = 0, on};
+
 class PowerInterface {
 public:
 	PowerInterface();
 	int readBatteryPercentage();
-	void servoPower(bool on);
+	void servoPower(ServoPowerAction action);
+	void logicPower(LogicPowerAction action);
 	bool servoPower_;
 private:
 	int _adcValue;

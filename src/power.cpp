@@ -35,11 +35,24 @@ int PowerInterface::readBatteryPercentage() {
 	return (float)(_adcValue - lowest) / (1024 - lowest) * 100;
 }
 
-void PowerInterface::servoPower(bool on) {
-	if(on) {
+void PowerInterface::servoPower(ServoPowerAction action) {
+	if(action == on) {
 		digitalWrite(servoPIN, 1);
-	} else {
+		servoPower_ = true;
+	} else if(action == off) {
 		digitalWrite(servoPIN, 0);
+		servoPower_ = false;
+	} else {
+		std::cout << "[Power] Invalid operation\n";
 	}
-	servoPower_ = on;
+}
+
+void PowerInterface::logicPower(LogicPowerAction action) {
+	if(action == poweroff || action == shutdown) {
+		std::system("shutdown -h now");
+	} else if(action == restart) {
+		std::system("reboot");
+	} else {
+		std::cout << "[Power] Invalid operation\n";
+	}
 }

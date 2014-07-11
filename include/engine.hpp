@@ -21,6 +21,7 @@
 #include <fstream>
 #include <boost/lambda/lambda.hpp>
 #include "serial.hpp"
+#include "power.hpp"
 //#include "parser.hpp"
 
 namespace hex {
@@ -116,6 +117,7 @@ public:
 class Hexapod {
 public:
 	Hexapod(const char* uart, const char* calibFile);
+	~Hexapod();
 	void parseMovement();
 	void moveLinear(Eigen::Vector3f unitDisp, int stepT, int count = 1);
 	void moveAngular(float unitAngularDisp, int stepT, int count = 1);
@@ -123,12 +125,17 @@ public:
 	void rotateBodyAround(const Eigen::Vector3f& rotStartNorm, int totalT);
 	void syncServoWithDelay(int delayms);
 	void sitDance();
+	std::string getTotalUseTime();
+	int getPowerCycle();
 
 	Plane base_;
 	Serial uart_;
+	PowerInterface power_;
 private:
 	std::string _actionFileContents;
 	bool _actionFileContentsAvailiable;
+	std::time_t _lastTime, _startTime, _currTime;
+	int _powerCycle;
 };
 
 
