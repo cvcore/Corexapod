@@ -21,7 +21,7 @@
  *
  */
 
-enum LogicPowerAction {poweroff, restart, shutdown};
+enum LogicPowerAction {poweroff, restart, halt};
 enum ServoPowerAction {off = 0, on};
 
 class PowerInterface {

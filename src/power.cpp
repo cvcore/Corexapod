@@ -48,7 +48,7 @@ void PowerInterface::servoPower(ServoPowerAction action) {
 }
 
 void PowerInterface::logicPower(LogicPowerAction action) {
-	if(action == poweroff || action == shutdown) {
+	if(action == poweroff || action == halt) {
 		std::system("shutdown -h now");
 	} else if(action == restart) {
 		std::system("reboot");
