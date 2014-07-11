@@ -21,6 +21,7 @@
  */
 
 class PowerInterface {
+public:
 	PowerInterface();
 	int readBatteryPercentage();
 	void servoPower(bool on);

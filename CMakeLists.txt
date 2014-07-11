@@ -41,8 +41,8 @@ set( LIB_SRC
     src/frontend/daemon.cpp
 )
 
-add_library( corexapod SHARED ${LIB_SRC} )
-target_link_libraries( corexapod ${Boost_LIBRARIES})
+#add_library( corexapod SHARED ${LIB_SRC} )
+#target_link_libraries( corexapod ${Boost_LIBRARIES})
 
 #add_executable( test src/test.cpp )
 #target_link_libraries( test corexapod )
@@ -50,5 +50,11 @@ target_link_libraries( corexapod ${Boost_LIBRARIES})
 #add_executable( testParser src/testParser.cpp )
 #target_link_libraries( testParser corexapod )
 
-add_executable( cdm src/app/corexapod.cpp )
-target_link_libraries( cdm corexapod )
+#add_executable( cdm src/app/corexapod.cpp )
+#target_link_libraries( cdm corexapod )
+
+add_library(power src/power.cpp)
+target_link_libraries(power wiringPi )
+
+add_executable( testPower src/testPower.cpp )
+target_link_libraries( testPower power wiringPi )
