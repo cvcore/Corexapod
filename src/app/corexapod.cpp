@@ -14,6 +14,5 @@ int main() {
 	hex::Parser p("src/actions.as", hexapod);
 	hex::Daemon d(50000, p);
 	d.spin();
+	return 0;
 }
-
-
