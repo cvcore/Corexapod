@@ -38,6 +38,7 @@
 									<listOptionValue builtIn="false" value="/usr/include/c++/4.2.1"/>
 									<listOptionValue builtIn="false" value="/usr/local/Cellar/eigen/3.2.1/include/eigen3"/>
 									<listOptionValue builtIn="false" value="/Users/core/Development/Projects/Corexapod/include"/>
+									<listOptionValue builtIn="false" value="/Users/core/Development/OpenSource/wiringPi/wiringPi"/>
 								</option>
 								<option id="org.eclipse.cdt.build.core.settings.holder.symbols.611979970" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__x86_64__"/>
