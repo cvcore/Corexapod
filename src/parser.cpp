@@ -200,7 +200,7 @@ std::string Parser::parseSocket(const std::string& socketStr) {
 		autoenable_ = false;
 	} else if(socketStr == "poweroff") {
 		ss << "success";
-		//_hexapod.power_.logicPower(poweroff);
+		_hexapod.power_.logicPower(poweroff);
 		finish_ = true;
 	} else if(socketStr == "reboot") {
 		ss << "success";

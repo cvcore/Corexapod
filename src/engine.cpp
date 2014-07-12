@@ -37,7 +37,7 @@ Eigen::Vector3f rotByVec(const Eigen::Vector3f& vec1, const Eigen::Vector3f& vec
 }
 
 Servo::Servo(int jointType, SideType side, int number) {
-	_actTime = 200; //ms
+	_actTime = 2000; //ms
 	_curPW = 1500;
 	_changed = true;
 	_number = number;
@@ -483,6 +483,7 @@ Hexapod::Hexapod(const char* uart, const char* calibFile) : uart_(uart), base_(c
 	}
 	logfile.close();
 	power_.servoPower(on);
+	this->syncServoWithDelay(2000);
 }
 
 Hexapod::~Hexapod() {
@@ -490,6 +491,15 @@ Hexapod::~Hexapod() {
 	_currTime = std::time(NULL);
 	logfile << _powerCycle << ' ' << _lastTime + _currTime - _startTime << '\n';
 	logfile.close();
+	for(int legIdx = 0; legIdx < 6; legIdx++) {
+		base_.leg_[legIdx]->_servo[0]->setAngle(0);
+		base_.leg_[legIdx]->_servo[1]->setAngle(0);
+		base_.leg_[legIdx]->_servo[2]->setAngle(45.f / 180 * PI);
+		base_.leg_[legIdx]->_servo[0]->setActTime(3000);
+		base_.leg_[legIdx]->_servo[1]->setActTime(3000);
+		base_.leg_[legIdx]->_servo[2]->setActTime(3000);
+	}
+	this->syncServoWithDelay(3000);
 	power_.servoPower(off);
 }
 
