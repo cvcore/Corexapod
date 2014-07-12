@@ -77,7 +77,7 @@ struct ActionScriptParser : qi::grammar<Iterator, ActionScript(), qi::space_type
 
 };
 
-Parser::Parser(const char* scriptPath, Hexapod& hexapod) : _hexapod(hexapod), autoenable_(false), _last(0) {
+Parser::Parser(const char* scriptPath, Hexapod& hexapod) : _hexapod(hexapod), autoenable_(false), _last(0), finish_(false) {
 	namespace qi = boost::spirit::qi;
 	if(scriptPath == NULL) {
 		std::cout << "[Parser] Empty file path.\n";
@@ -200,14 +200,17 @@ std::string Parser::parseSocket(const std::string& socketStr) {
 		autoenable_ = false;
 	} else if(socketStr == "poweroff") {
 		ss << "success";
-		_hexapod.power_.logicPower(poweroff);
+		//_hexapod.power_.logicPower(poweroff);
+		finish_ = true;
 	} else if(socketStr == "reboot") {
 		ss << "success";
 		_hexapod.power_.logicPower(restart);
+		finish_ = true;
 	} else if(socketStr == "status") {
-		ss << "{\"totalUseTime\":" << _hexapod.getTotalUseTime() << "," <<
+		ss << "{\"totalUseTime\":\"" << _hexapod.getTotalUseTime() << "\"," <<
 			  "\"powerCycle\":" << _hexapod.getPowerCycle() << "," <<
 			  "\"battery\":\"" << _hexapod.power_.readBatteryPercentage() << "%\"}";
+		std::cout << "[Parser][Debug] " << ss.str() << '\n';
 	} else {
 		this -> act(socketStr);
 		ss << "success";

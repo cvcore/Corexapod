@@ -77,6 +77,7 @@ public:
 	std::string parseSocket(const std::string& socketStr);
 
 	bool autoenable_;
+	bool finish_;
 private:
 	void buildIndex();
 

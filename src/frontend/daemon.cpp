@@ -64,6 +64,6 @@ void Daemon::spinOnce() {
 }
 
 void Daemon::spin() {
-	while(true)
+	while(!_parser.finish_)
 		this->spinOnce();
 }

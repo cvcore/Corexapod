@@ -473,17 +473,24 @@ Servo* Plane::getServo(int legIdx, int servoIdx) {
 Hexapod::Hexapod(const char* uart, const char* calibFile) : uart_(uart), base_(calibFile), _actionFileContentsAvailiable(false) {
 	_lastTime = 0;
 	_currTime = _startTime = std::time(NULL);
-	std::ifstream logfile("~/.corexapod");
-	logfile >> _lastTime >> _powerCycle;
+	std::ifstream logfile(".corexapod");
+	if(logfile) {
+		logfile >> _powerCycle >> _lastTime;
+		logfile.close();
+	} else {
+		_lastTime = 0;
+		_powerCycle = 1;
+	}
 	logfile.close();
-	_powerCycle++;
+	power_.servoPower(on);
 }
 
 Hexapod::~Hexapod() {
-	std::ofstream logfile("~/.corexapod");
+	std::ofstream logfile(".corexapod");
 	_currTime = std::time(NULL);
-	logfile << _lastTime + _currTime - _startTime << _powerCycle;
+	logfile << _powerCycle << ' ' << _lastTime + _currTime - _startTime << '\n';
 	logfile.close();
+	power_.servoPower(off);
 }
 
 void Hexapod::parseMovement() {
