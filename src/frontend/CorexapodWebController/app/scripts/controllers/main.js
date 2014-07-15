@@ -41,7 +41,7 @@ angular.module('corexapodControllerApp')
             clearInterval(timerRefresh);
             jQuery('#info')
               .addClass('alert-info')
-              .html('<span id="countdown">30</span> 秒后可以安全关闭电源');
+              .html('<span id="countdown">90</span> 秒后可以安全关闭电源');
             var timerCountdown = window.setInterval(function() {
               var countdown = jQuery('#countdown').text();
               if (countdown == 0) {
