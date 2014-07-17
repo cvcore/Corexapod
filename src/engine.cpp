@@ -484,9 +484,9 @@ Hexapod::Hexapod(const char* uart, const char* calibFile) : uart_(uart), base_(c
 	}
 	logfile.close();
 	for(int legIdx = 0; legIdx < 6; legIdx++) {
-		base_.leg_[legIdx]->_servo[0]->setAngle(0);
+		base_.leg_[legIdx]->_servo[2]->setAngle(0);
 		base_.leg_[legIdx]->_servo[1]->setAngle(0);
-		base_.leg_[legIdx]->_servo[2]->setAngle(45.f / 180 * PI);
+		base_.leg_[legIdx]->_servo[0]->setAngle(45.f / 180 * PI);
 		base_.leg_[legIdx]->_servo[0]->setActTime(500);
 		base_.leg_[legIdx]->_servo[1]->setActTime(500);
 		base_.leg_[legIdx]->_servo[2]->setActTime(500);
@@ -503,9 +503,9 @@ Hexapod::~Hexapod() {
 	logfile << _powerCycle << ' ' << _lastTime + _currTime - _startTime << '\n';
 	logfile.close();
 	for(int legIdx = 0; legIdx < 6; legIdx++) {
-		base_.leg_[legIdx]->_servo[0]->setAngle(0);
+		base_.leg_[legIdx]->_servo[2]->setAngle(0);
 		base_.leg_[legIdx]->_servo[1]->setAngle(0);
-		base_.leg_[legIdx]->_servo[2]->setAngle(45.f / 180 * PI);
+		base_.leg_[legIdx]->_servo[0]->setAngle(45.f / 180 * PI);
 		base_.leg_[legIdx]->_servo[0]->setActTime(3000);
 		base_.leg_[legIdx]->_servo[1]->setActTime(3000);
 		base_.leg_[legIdx]->_servo[2]->setActTime(3000);
