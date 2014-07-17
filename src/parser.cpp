@@ -291,4 +291,8 @@ void Parser::parseLine(const Line& line) const {
 	}
 }
 
+void Parser::signalHandler(int sig) {
+	finish_ = true;
+}
+
 }

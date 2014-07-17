@@ -75,6 +75,7 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const Parser& p);
 	void parseLine(const Line& line) const;
 	std::string parseSocket(const std::string& socketStr);
+	void signalHandler(int sig);
 
 	bool autoenable_;
 	bool finish_;
