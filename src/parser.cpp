@@ -58,8 +58,8 @@ struct ActionScriptParser : qi::grammar<Iterator, ActionScript(), qi::space_type
 				>> '(' >> float_[at_c<3>(_val) = qi::_1 ] >> ',' >> float_[at_c<4>(_val) = qi::_1 ] >> ',' >> float_[at_c<5>(_val) = qi::_1 ] >> ')')
 			    | char_("V")[at_c<0>(_val) = qi::_1] >> mem_[at_c<1>(_val) = qi::_1] >> char_[at_c<2>(_val) = qi::_1] >> float_[at_c<3>(_val) = qi::_1];
 
-		line_ = (lit("NOP")[at_c<2>(_val) = true] |
-				+grp_[push_back(at_c<0>(_val), qi::_1), at_c<2>(_val) = false]) >> char_('T') >> int_[at_c<1>(_val) = qi::_1] >> -lit('$')[at_c<3>(_val) = true];
+		line_ = (lit("NOP")[at_c<2>(_val) = true] | +grp_[push_back(at_c<0>(_val), qi::_1), at_c<2>(_val) = false])
+				>> char_('T') >> int_[at_c<1>(_val) = qi::_1] >> -lit('$')[at_c<3>(_val) = true];
 
 		blk_ = +(char_ - "{")[at_c<0>(_val) += _1]
 		         >> '{'
@@ -226,6 +226,11 @@ void Parser::parseLine(const Line& line) const {
 	std::cout << _hexapod.base_;
 	for(it = line.group_.begin(); it != line.group_.end(); it++) {
 		Eigen::Vector3f newVec(it->x_, it->y_, it->z_);
+		if(line.empty_) {
+			std::cout << "Empty line, skipped.\n";
+			usleep(line.time_ * 1000);
+			continue;
+		}
 		switch(it->groupType_) {
 		case 'B' :
 			baseLine = true;
