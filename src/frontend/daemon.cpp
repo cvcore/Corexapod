@@ -59,8 +59,8 @@ void Daemon::spinOnce() {
 			std::cout << "[Daemon] F_SETFL error\n";
 		_nonblock = false;
 	}
-
-	close(newsockfd);
+	if(newsockfd >= 0)
+		close(newsockfd);
 }
 
 void Daemon::spin() {

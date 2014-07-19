@@ -21,6 +21,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH})
 # set include dirs
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
+# find necessary packages
 set( Boost_USE_STATIC_LIBS ON ) 
 find_package(Boost 1.40 COMPONENTS thread date_time program_options filesystem system regex REQUIRED)
 include_directories(${BOOST_INCLUDE_DIR})
@@ -43,7 +44,7 @@ set( LIB_SRC
 )
 
 add_library( foundation SHARED ${LIB_SRC} )
-target_link_libraries( foundation ${Boost_LIBRARIES} wiringPi)
+target_link_libraries( foundation ${Boost_LIBRARIES} wiringPi )
 
 #add_executable( test src/test.cpp )
 #target_link_libraries( test corexapod )
@@ -52,8 +53,7 @@ target_link_libraries( foundation ${Boost_LIBRARIES} wiringPi)
 #target_link_libraries( testParser corexapod )
 
 add_executable( cdm src/app/corexapod.cpp )
-target_link_libraries( cdm foundation )
-
+target_link_libraries( cdm foundation ${Boost_LIBRARIES} )
 
 #add_executable( testPower src/testPower.cpp )
 #target_link_libraries( testPower power wiringPi )

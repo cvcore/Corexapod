@@ -761,3 +761,12 @@ std::string Hexapod::getTotalUseTime() {
 int Hexapod::getPowerCycle() {
 	return _powerCycle;
 }
+
+void Hexapod::allServoMidPositon() {
+	for(int legIdx = 0; legIdx < 6; legIdx++) {
+		for(int servoIdx = 0; servoIdx < 3; servoIdx++) {
+			Servo* servo = base_.leg_[legIdx]->_servo[servoIdx];
+			servo->setPW(1500);
+		}
+	}
+}

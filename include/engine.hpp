@@ -127,6 +127,7 @@ public:
 	void sitDance();
 	std::string getTotalUseTime();
 	int getPowerCycle();
+	void allServoMidPositon();
 
 	Plane base_;
 	Serial uart_;
