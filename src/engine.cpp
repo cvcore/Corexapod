@@ -483,6 +483,7 @@ Hexapod::Hexapod(const char* uart, const char* calibFile) : uart_(uart), base_(c
 		_powerCycle = 1;
 	}
 	logfile.close();
+	power_.servoPower(on);
 	for(int legIdx = 0; legIdx < 6; legIdx++) {
 		base_.leg_[legIdx]->_servo[2]->setAngle(0);
 		base_.leg_[legIdx]->_servo[1]->setAngle(0);
@@ -490,11 +491,10 @@ Hexapod::Hexapod(const char* uart, const char* calibFile) : uart_(uart), base_(c
 		base_.leg_[legIdx]->_servo[0]->setActTime(500);
 		base_.leg_[legIdx]->_servo[1]->setActTime(500);
 		base_.leg_[legIdx]->_servo[2]->setActTime(500);
+		syncServoWithDelay(700);
 	}
-	syncServoWithDelay(500);
-	base_.translate(base_.origin_,3000);
+	base_.translate(base_.origin_, 3000);
 	syncServoWithDelay(3000);
-	power_.servoPower(on);
 }
 
 Hexapod::~Hexapod() {
