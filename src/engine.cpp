@@ -769,4 +769,5 @@ void Hexapod::allServoMidPositon() {
 			servo->setPW(1500);
 		}
 	}
+	base_.writeSerial(uart_);
 }

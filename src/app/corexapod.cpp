@@ -18,14 +18,16 @@ namespace po = boost::program_options;
 hex::Hexapod hexapod("/dev/ttyAMA0", "src/calib.param");
 hex::Parser p("src/actions.as", hexapod);
 hex::Daemon d(50000, p);
+bool finish = false;
 
 void signalHandler(int sig) {
 	std::cout << "Terminated." << std::endl;
 	p.finish_ = true;
+	finish = true;
 }
 
-int int main(int argc, char **argv) {
-	po::option_description desc("Allowed options");
+int main(int argc, char **argv) {
+	po::options_description desc("Allowed options");
 	desc.add_options()
 	    ("help", "produce help message")
 	    ("calibrate,C", "calibrate servos")
@@ -34,6 +36,8 @@ int int main(int argc, char **argv) {
 	po::variables_map vm;
 	po::store(po::parse_command_line(argc, argv, desc), vm);
 	po::notify(vm);
+	
+	std::signal(SIGINT, signalHandler); // add support for destructor
 
 	if (vm.count("help")) {
 	    std::cout << desc << "\n";
@@ -44,8 +48,9 @@ int int main(int argc, char **argv) {
 	} else if (vm.count("debug-middle")) {
 		std::cout << "Setting all servos to mid position\n";
 		hexapod.allServoMidPositon();
+		while(!finish)
+		    sleep(1);
 	} else {
-		std::signal(SIGTERM, signalHandler); // add support for destructor
 		d.spin();
 	}
 	return 0;
