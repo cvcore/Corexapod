@@ -39,7 +39,7 @@ Eigen::Vector3f rotByVec(const Eigen::Vector3f& vec1, const Eigen::Vector3f& vec
 Servo::Servo(int jointType, SideType side, int number) {
 	_actTime = 2000; //ms
 	_curPW = 1500;
-	_changed = true;
+	_changed = false;
 	_number = number;
 	_jointType = jointType;
 	if(side == left) {
@@ -510,7 +510,7 @@ Hexapod::~Hexapod() {
 		base_.leg_[legIdx]->_servo[1]->setActTime(3000);
 		base_.leg_[legIdx]->_servo[2]->setActTime(3000);
 	}
-	this->syncServoWithDelay(3000);
+	this->syncServoWithDelay(3500);
 	power_.servoPower(off);
 }
 
