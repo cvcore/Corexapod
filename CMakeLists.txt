@@ -38,22 +38,11 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 set( LIB_SRC
     src/engine.cpp
     src/serial.cpp
-    src/parser.cpp
-    src/frontend/daemon.cpp
-    src/power.cpp
+    src/uscwrapper.cpp
 )
 
 add_library( foundation SHARED ${LIB_SRC} )
-target_link_libraries( foundation ${Boost_LIBRARIES} wiringPi )
+target_link_libraries( foundation ${BOOST_LIBRARIES} )
 
-#add_executable( test src/test.cpp )
-#target_link_libraries( test corexapod )
-
-#add_executable( testParser src/testParser.cpp )
-#target_link_libraries( testParser corexapod )
-
-add_executable( cdm src/app/corexapod.cpp )
-target_link_libraries( cdm foundation ${Boost_LIBRARIES} )
-
-#add_executable( testPower src/testPower.cpp )
-#target_link_libraries( testPower power wiringPi )
+add_executable( demo src/app/uscdemo.cpp )
+target_link_libraries( demo foundation )

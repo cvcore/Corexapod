@@ -11,3 +11,5 @@ build/
 .settings
 src/test.cpp
 test
+*.PcbDocPreview
+*.SchDocPreview

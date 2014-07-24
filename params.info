@@ -1,0 +1,281 @@
+; This file is in INFO format, please refer to
+; http://www.boost.org/doc/libs/1_42_0/doc/html/boost_propertytree/parsers.html#boost_propertytree.parsers.info_parser
+; for further information.
+Length
+{
+	leg1Len 140.801278
+	leg2Len 86.0
+	len3 8.0
+	len4 29.0
+	height 120
+}
+
+Origin
+{
+	orig0
+	{
+		x 75.0
+		y 40.0
+		z 0.0
+	}
+	orig1
+	{
+		x 0.0
+		y 67.8838
+		z 0.0
+	}
+	orig2
+	{
+		x -75.0
+		y 40.0
+		z 0.0
+	}
+	orig3
+	{
+		x 75.0
+		y -40.0
+		z 0.0
+	}
+	orig4
+	{
+		x 0.0
+		y -67.8838
+		z 0.0
+	}
+	orig5
+	{
+		x -75.0
+		y -40.0
+		z 0.0
+	}
+}
+
+Position
+{
+	p0
+	{
+		x 150.8824
+		y 80.4706
+		z 0.0
+	}
+	p1
+	{
+		x 0.0
+		y 153.8388
+		z 0.0
+	}
+	p2
+	{
+		x -158.8824
+		y 80.4706
+		z 0.0
+	}
+	p3
+	{
+		x 150.8824
+		y -80.4706
+		z 0.0
+	}
+	p4
+	{
+		x 0.0	
+		y -153.8388
+		z 0.0
+	}
+	p5
+	{
+		x -158.8824
+		y -80.4706
+		z 0.0
+	}
+}
+
+;todo change sxx to snumber
+Servo
+{
+	s21
+	{
+		legIdx 0
+		jointType 0
+		number 21
+		minPW 2500
+		maxPW 600
+	}
+	s22
+	{
+		legIdx 0
+		jointType 1
+		number 22
+		minPW 2420
+		maxPW 480
+	}
+	s23
+	{
+		legIdx 0
+		jointType 2
+		number 23
+		minPW 1590
+		maxPW -298
+	}
+	s24
+	{
+		legIdx 1
+		jointType 0
+		number 24
+		minPW 2540
+		maxPW 600
+	}
+	s25
+	{
+		legIdx 1
+		jointType 1
+		number 25
+		minPW 2440
+		maxPW 500
+	}
+	s26
+	{
+		legIdx 1
+		jointType 2
+		number 26
+		minPW 1550
+		maxPW -368
+	}
+	s27
+	{
+		legIdx 2
+		jointType 0
+		number 27
+		minPW 2500
+		maxPW 600
+	}
+	s28
+	{
+		legIdx 2
+		jointType 1
+		number 28
+		minPW 2400
+		maxPW 500
+	}
+	s29
+	{
+		legIdx 2
+		jointType 2
+		number 29
+		minPW 1480
+		maxPW -438
+	}
+	s12
+	{
+		legIdx 3
+		jointType 0
+		number 12
+		minPW 330
+		maxPW 2270
+	}
+	s11
+	{
+		legIdx 3
+		jointType 1
+		number 11
+		minPW 500
+		maxPW 2450
+	}		
+	s10
+	{
+		legIdx 3
+		jointType 2
+		number 10
+		minPW 1400
+		maxPW -459
+	}
+	s9
+	{
+		legIdx 4
+		jointType 0
+		number 9
+		minPW 439
+		maxPW 2399
+	}
+	s8
+	{
+		legIdx 4
+		jointType 1
+		number 8
+		minPW 620
+		maxPW 2610
+	}
+	s7
+	{
+		legIdx 4
+		jointType 2
+		number 7
+		minPW 1550
+		maxPW -400
+	}
+	s6
+	{
+		legIdx 5
+		jointType 0
+		number 6
+		minPW 460
+		maxPW 2400
+	}
+	s5
+	{
+		legIdx 5
+		jointType 1
+		number 5
+		minPW 580
+		maxPW 2500
+	}
+	s4
+	{
+		legIdx 5
+		jointType 2
+		number 4
+		minPW 1600
+		maxPW -170
+	}	
+}
+
+AssociateServo
+{
+	l0
+	{
+		s0 21
+		s1 22
+		s2 23
+	}
+	l1
+	{
+		s0 24
+		s1 25
+		s2 26
+	}
+	l2
+	{
+		s0 27
+		s1 28
+		s2 29
+	}
+	l3
+	{
+		s0 12
+		s1 11
+		s2 10
+	}
+	l4
+	{
+		s0 9
+		s1 8
+		s2 7
+	}
+	l5
+	{
+		s0 6
+		s1 5
+		s2 4
+	}
+}
+

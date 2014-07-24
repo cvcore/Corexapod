@@ -7,14 +7,12 @@
 
 #include "engine.hpp"
 
-using namespace hex;
-using namespace std;
-
 const float PI = 3.14159265359f;
 //const float initHeight = 29.0f + 140.801278f;
 const float initHeight = 120;
-const float leg1Len = 140.801278;
-const float leg2Len = 86.0;
+
+using namespace hex;
+using namespace std;
 
 float rotationAngle(const Eigen::Vector3f& a, const Eigen::Vector3f& b) {
 	float result = a.dot(b);
@@ -36,36 +34,58 @@ Eigen::Vector3f rotByVec(const Eigen::Vector3f& vec1, const Eigen::Vector3f& vec
 	return newvec;
 }
 
-Servo::Servo(int jointType, SideType side, int number) {
-	_actTime = 2000; //ms
+Servo::Servo(int number, const ptree* ppt) {
+	/* use default init value */
+	_actTime = 2000;
 	_curPW = 1500;
 	_changed = false;
+	_angle = 0.f;
+	/* value must specify in init file */
+	std::stringstream servoPath;
+	servoPath << "Servo." << "s" << number;
+	_jointType = ppt->get<int>(servoPath.str() + ".jointType");
 	_number = number;
-	_jointType = jointType;
-	if(side == left) {
-		if(jointType % 3 == 2) {
-			_minPW = 1500;
-			_maxPW = 500;
-			_angle = 0.f;
-		} else {
-			_minPW = 2500;
-			_maxPW = 500;
-			_angle = PI / 2;
-		}
-	} else if(side == right) {
-		if(jointType % 3 == 2) {
-			_minPW = 1500;
-			_maxPW = 500;
-			_angle = 0.f;
-		} else {
-			_minPW = 500;
-			_maxPW = 2500;
-			_angle = PI / 2;
-		}
-	} else {
-		assert(false);
-	}
+	_minPW = ppt->get<int>(servoPath.str() + ".minPW");
+	_maxPW = ppt->get<int>(servoPath.str() + ".maxPW");
+	//std::cout << _jointType << ' ' << _number << ' ' << _minPW << ' ' << _maxPW << '\n';
+//		_actTime = 2000; //ms
+//		_curPW = 1500;
+//		_changed = false;
+//		_number = number;
+//		_jointType = jointType;
+//		if(ppt == NULL) {
+//			if(side == left) {
+//				if(jointType % 3 == 2) {
+//					_minPW = 1500;
+//					_maxPW = 500;
+//					_angle = 0.f;
+//				} else {
+//					_minPW = 2500;
+//					_maxPW = 500;
+//					_angle = PI / 2;
+//				}
+//			} else if(side == right) {
+//				if(jointType % 3 == 2) {
+//					_minPW = 1500;
+//					_maxPW = 500;
+//					_angle = 0.f;
+//				} else {
+//					_minPW = 500;
+//					_maxPW = 2500;
+//					_angle = PI / 2;
+//				}
+//			} else {
+//				std::cerr << "[Fatal] Undefined side type!\n";
+//				assert(false);
+//			}
+//		} else {
+//			std::stringstream servoPath;
+//			servoPath << "Servo.s" << number;
+//			_minPW = ppt->get<int>(servoPath.str() + ".minPW");
+//			_maxPW = ppt->get<int>(servoPath.str() + ".maxPW");
+//		}
 }
+
 
 void Servo::calibrate(Serial& serial) {
 	char stat = 0;
@@ -123,14 +143,61 @@ void Servo::setActTime(int timems) {
 	_actTime = timems;
 }
 
-Leg::Leg(SideType side, const Eigen::Vector3f& origin, const Eigen::Vector3f& pos, const std::vector<int>& servoNumberVec, const Plane& refPlane)
-: _origin(origin), _initOrigin(origin), _pos(pos), _side(side), _refPlane(refPlane) {
-	int sIdx;
-	for(sIdx = 0; sIdx < 3; sIdx++) {
-		_servo[sIdx] = new Servo(sIdx, side, servoNumberVec[sIdx]);
-	}
-	this->resetMovement();
+// Leg::Leg(SideType side,
+// 		int legIdx,
+// 		const std::vector<int>& servoNumberVec,
+// 		const Plane& refPlane,
+// 		const ptree* ppt) :
+// 	_side(side),
+// 	_refPlane(refPlane),
+// 	_leg1Len(ppt->get<float>("Length.leg1Len")),
+// 	_leg2Len(ppt->get<float>("Length.leg2Len")),
+// 	_len3(ppt->get<float>("Length.len3")),
+// 	_len4(ppt->get<float>("Length.len4")) {
+// 	std::stringstream origPath, posPath;
+// 	origPath << "Origin.orig" << legIdx;
+// 	posPath << "Position.p" << legIdx;
+// 	Eigen::Vector3f vOrig(ppt->get<float>(origPath.str() + ".x"),
+// 						  ppt->get<float>(origPath.str() + ".y"),
+// 						  ppt->get<float>(origPath.str() + ".z")),
+// 					vPos(ppt->get<float>(posPath.str() + ".x"),
+//                          ppt->get<float>(posPath.str() + ".y"),
+//                          ppt->get<float>(posPath.str() + ".z"));
+// 	_origin = _initOrigin = vOrig;
+// 	_pos = vPos;
+// 	for(int sIdx = 0; sIdx < 3; sIdx++) {
+// 		_servo[sIdx] = new Servo(sIdx, side, servoNumberVec[sIdx], ppt);
+// 	}
+// 	this->resetMovement();
+// }
+
+Leg::Leg(int legIdx, const Plane& refPlane, const ptree* ppt) :
+	_refPlane(refPlane),
+	_leg1Len(ppt->get<float>("Length.leg1Len")),
+    _leg2Len(ppt->get<float>("Length.leg2Len")),
+	_len3(ppt->get<float>("Length.len3")),
+    _len4(ppt->get<float>("Length.len4")) {
+
+ 	std::stringstream origPath, posPath;
+ 	origPath << "Origin.orig" << legIdx;
+ 	posPath << "Position.p" << legIdx;
+ 	Eigen::Vector3f vOrig(ppt->get<float>(origPath.str() + ".x"),
+ 						  ppt->get<float>(origPath.str() + ".y"),
+ 						  ppt->get<float>(origPath.str() + ".z")),
+ 					vPos( ppt->get<float>(posPath.str() + ".x"),
+                          ppt->get<float>(posPath.str() + ".y"),
+                          ppt->get<float>(posPath.str() + ".z"));
+ 	_origin = _initOrigin = vOrig;
+ 	_pos = vPos;
+ 	for(int sIdx = 0; sIdx < 3; sIdx++) {
+		std::stringstream servoPath;
+		servoPath << "AssociateServo.l" << legIdx << ".s" << sIdx;
+		int servoNum = ppt->get<int>(servoPath.str());
+ 		_servo[sIdx] = new Servo(servoNum, ppt);
+ 	}
+ 	this->resetMovement();
 }
+
 
 Leg::~Leg() {
 	for(int sIdx = 0; sIdx < 3; sIdx++) {
@@ -145,7 +212,7 @@ void Leg::setPosition(const Eigen::Vector3f& pos, int time) {
 					lp = pp - (_origin + _refPlane.origin_),
 					olp =  ol.cross(lp);
 	Eigen::Vector3f initNormal(Eigen::Vector3f::UnitZ());
-	float alpha = asin(8.0f / lp.norm()),
+	float alpha = asin(_len3 / lp.norm()),
 		  beta = acos(ol.dot(lp) / (ol.norm() * lp.norm()));
 	if(olp.dot(_refPlane.normal_) < 0) {
 		beta = -beta;
@@ -162,20 +229,20 @@ void Leg::setPosition(const Eigen::Vector3f& pos, int time) {
 					bd;
 //	obOffset << 0, 0, _refPlane.origin_(2) - 29.f;
 //	obOffset = _refPlane.origin_ + _origin + Eigen::Vector3f(0, 0, -29.0);
-	obOffset = _refPlane.origin_ + _origin + _refPlane.normal_ * (-29.0) / _refPlane.normal_.norm();
+	obOffset = _refPlane.origin_ + _origin + _refPlane.normal_ * (-_len4) / _refPlane.normal_.norm();
 	float lbd, lbd2, theta, delta;
-	const float lbc2 = leg2Len * leg2Len,
-				lcd2 = leg1Len * leg1Len,
-				lbc  = leg2Len,
-				lcd  = leg1Len;
+	const float lbc2 = _leg2Len * _leg2Len,
+				lcd2 = _leg1Len * _leg1Len,
+				lbc  = _leg2Len,
+				lcd  = _leg1Len;
 
 //	Eigen::AngleAxisf yaw(_servo[2]->_angle, Eigen::Vector3f(0, 0, 1));
 	Eigen::AngleAxisf yaw(_servo[2]->_angle, _refPlane.normal_);
 	ob = yaw * ob;
 	if(_side == left) {
-		ob = ob * 8.f / ob.norm();
+		ob = ob * _len3 / ob.norm();
 	} else {
-		ob = ob * -8.f / ob.norm();
+		ob = ob * -_len3 / ob.norm();
 	}
 //	obOffset += _initOrigin;
 	bb = ob + obOffset;
@@ -238,62 +305,59 @@ Eigen::Vector3f Leg::requestPosition(int time) const {
 }
 
 Plane::Plane(const char *paramFilePath)
-: origin_(0, 0, initHeight), normal_(Eigen::Vector3f::UnitZ()), front_(Eigen::Vector3f::UnitX()) {
-	int legIdx;
-	int servoNum;
-
-	initLegOrigin_[0] << 75.0,	40.0,		0.0;
-	initLegOrigin_[1] << 0.0,	67.8838,	0.0;
-	initLegOrigin_[2] << -75.0,	40.0,		0.0;
-	initLegOrigin_[3] << 75.0,	-40.0,		0.0;
-	initLegOrigin_[4] << 0.0,	-67.8838,	0.0;
-	initLegOrigin_[5] << -75.0,	-40.0,		0.0;
-
-	initLegPos_[0] <<	150.8824,	80.4706,	0.0;
-	initLegPos_[1] <<	0.0,		153.8388,	0.0;
-	initLegPos_[2] <<	-158.8824,	80.4706,	0.0;
-	initLegPos_[3] <<	150.8824,	-80.4706,	0.0;
-	initLegPos_[4] <<	0.0,		-153.8388,	0.0;
-	initLegPos_[5] <<	-158.8824,	-80.4706,	0.0;
-
-	//left side
-	for(servoNum = 21, legIdx = 0; legIdx < 3; legIdx++, servoNum += 3) {
-		std::vector<int> servoVec;
-		servoVec.push_back(servoNum);
-		servoVec.push_back(servoNum + 1);
-		servoVec.push_back(servoNum + 2);
-		//initLegOrigin is related to origin_
-		leg_[legIdx] = new Leg(left, initLegOrigin_[legIdx], initLegPos_[legIdx], servoVec, *this);
-	}
-
-	//right side
-	for(servoNum = 12; legIdx < 6; legIdx++, servoNum -= 3) {
-		std::vector<int> servoVec;
-		servoVec.push_back(servoNum);
-		servoVec.push_back(servoNum - 1);
-		servoVec.push_back(servoNum - 2);
-		leg_[legIdx] = new Leg(right, initLegOrigin_[legIdx], initLegPos_[legIdx], servoVec, *this);
-	}
+: normal_(Eigen::Vector3f::UnitZ()), front_(Eigen::Vector3f::UnitX()) {
+//	int legIdx, servoNum;
+//	float l1Len, l2Len, planeLen;
+//	std::memset(initLegOrigin_, 0, sizeof(initLegOrigin_));
+//	std::memset(initLegPos_, 0, sizeof(initLegPos_));
+	ptree pt;
 
 	if(paramFilePath != NULL) {
-		std::cout << "[Info] Initializing using parameter file.\n";
-		std::ifstream paramFile(paramFilePath);
-		if(paramFile.is_open()) {
-			int legIdx, sIdx;
-			Servo* pServo;
-			while(!paramFile.eof()) {
-				paramFile >> legIdx >> sIdx;
-				if(legIdx < 0 || legIdx >= 6 || sIdx < 0 || sIdx >= 3) {
-					std::cout << "[Warning] Invalid parameter, skipped\n";
-					continue;
-				}
-				pServo = leg_[legIdx]->_servo[sIdx];
-				paramFile >> pServo->_number >> pServo->_minPW >> pServo->_maxPW;
-			}
-		} else {
-			std::cout << "[Warning] Parameter file not exist!\n";
+		std::cout << "[Info] Reading parameter file: " << paramFilePath << "..";
+		boost::property_tree::read_info(paramFilePath, pt);
+		std::cout << " Done.\n";
+		origin_ = Eigen::Vector3f(0, 0, pt.get<float>("Length.height"));
+		for(int legIdx = 0; legIdx < 6; legIdx++) {
+			leg_[legIdx] = new Leg(legIdx, *this, &pt);
 		}
+	} else {
+		std::cerr << "[Fatal] You must specify a parameter file!\n";
+		assert(false);
 	}
+//	else {
+//		std::cout << "[Warning] Parameter file not exist! Initializing using default parameters..\n";
+//		initLegOrigin_[0] << 75.0,	40.0,		0.0;
+//		initLegOrigin_[1] << 0.0,	67.8838,	0.0;
+//		initLegOrigin_[2] << -75.0,	40.0,		0.0;
+//		initLegOrigin_[3] << 75.0,	-40.0,		0.0;
+//		initLegOrigin_[4] << 0.0,	-67.8838,	0.0;
+//		initLegOrigin_[5] << -75.0,	-40.0,		0.0;
+//		initLegPos_[0] <<	150.8824,	80.4706,	0.0;
+//		initLegPos_[1] <<	0.0,		153.8388,	0.0;
+//		initLegPos_[2] <<	-158.8824,	80.4706,	0.0;
+//		initLegPos_[3] <<	150.8824,	-80.4706,	0.0;
+//		initLegPos_[4] <<	0.0,		-153.8388,	0.0;
+//		initLegPos_[5] <<	-158.8824,	-80.4706,	0.0;
+//	}
+	//left side
+//	for(servoNum = 21, legIdx = 0; legIdx < 3; legIdx++, servoNum += 3) {
+//		std::vector<int> servoVec;
+//		servoVec.push_back(servoNum);
+//		servoVec.push_back(servoNum + 1);
+//		servoVec.push_back(servoNum + 2);
+//		//initLegOrigin is related to origin_
+//		leg_[legIdx] = new Leg(left, initLegOrigin_[legIdx], initLegPos_[legIdx], servoVec, *this);
+//	}
+//
+//	//right side
+//	for(servoNum = 12; legIdx < 6; legIdx++, servoNum -= 3) {
+//		std::vector<int> servoVec;
+//		servoVec.push_back(servoNum);
+//		servoVec.push_back(servoNum - 1);
+//		servoVec.push_back(servoNum - 2);
+//		leg_[legIdx] = new Leg(right, initLegOrigin_[legIdx], initLegPos_[legIdx], servoVec, *this);
+//	}
+//}
 }
 
 Plane::~Plane() {
@@ -483,7 +547,7 @@ Hexapod::Hexapod(const char* uart, const char* calibFile) : uart_(uart), base_(c
 		_powerCycle = 1;
 	}
 	logfile.close();
-	power_.servoPower(on);
+//	power_.servoPower(on);
 	for(int legIdx = 0; legIdx < 6; legIdx++) {
 		base_.leg_[legIdx]->_servo[2]->setAngle(0);
 		base_.leg_[legIdx]->_servo[1]->setAngle(0);
@@ -511,33 +575,33 @@ Hexapod::~Hexapod() {
 		base_.leg_[legIdx]->_servo[2]->setActTime(3000);
 	}
 	this->syncServoWithDelay(3500);
-	power_.servoPower(off);
+//	power_.servoPower(off);
 }
 
 void Hexapod::parseMovement() {
-	int nextT[6] = {0}, next[6] = {1, 1, 1, 1, 1, 1};
+	size_t nextT[6] = {0}, next[6] = {1, 1, 1, 1, 1, 1};
 	for(int legIdx = 0; legIdx < 6; legIdx++) {
 		if(base_.leg_[legIdx]->moveGroup_.size() == 1)
-			nextT[legIdx] = std::numeric_limits<int>::max();
+			nextT[legIdx] = std::numeric_limits<size_t>::max();
 		else {
 			nextT[legIdx] = base_.leg_[legIdx]->moveGroup_[1].deltaT_;
 		}
 	}
-	int lastT = 0, currT = 0;
+	size_t lastT = 0, currT = 0;
 	for(int minPos = min_element(nextT, nextT + 6) - nextT;
-			nextT[minPos] != std::numeric_limits<int>::max();
+			nextT[minPos] != std::numeric_limits<size_t>::max();
 			minPos = min_element(nextT, nextT + 6) - nextT) {
 			Leg *minLeg = base_.leg_[minPos];
 		if(nextT[minPos] <= currT) {
 			if((++next[minPos]) == minLeg->moveGroup_.size())
-				nextT[minPos] = std::numeric_limits<int>::max();
+				nextT[minPos] = std::numeric_limits<size_t>::max();
 			else
 				nextT[minPos] += minLeg->moveGroup_[next[minPos]].deltaT_;
 			continue;
 		} else {
 			currT = nextT[minPos];
 			if((++next[minPos]) == minLeg->moveGroup_.size())
-				nextT[minPos] = std::numeric_limits<int>::max();
+				nextT[minPos] = std::numeric_limits<size_t>::max();
 			else
 				nextT[minPos] += minLeg->moveGroup_[next[minPos]].deltaT_;
 

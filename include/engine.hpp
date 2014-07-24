@@ -19,7 +19,10 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 #include <boost/lambda/lambda.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/info_parser.hpp>
 #include "serial.hpp"
 #include "power.hpp"
 //#include "parser.hpp"
@@ -27,6 +30,7 @@
 namespace hex {
 
 typedef enum { left, right } SideType;
+using boost::property_tree::ptree;
 
 class Plane;
 class Leg;
@@ -46,7 +50,7 @@ struct Velocity {
 
 class Servo {
 public:
-	Servo(int jointType, SideType side, int number);
+	Servo(int number, const ptree* ppt);
 //	~Servo();
 	void calibrate(Serial& serial);
 	void setPW(int pw);
@@ -64,7 +68,8 @@ private:
 
 class Leg {
 public:
-	Leg(SideType side, const Eigen::Vector3f& origin, const Eigen::Vector3f& pos, const std::vector<int>& servoNumberVec, const Plane& refPlane);
+	//Leg(SideType side, int legIdx, const std::vector<int>& servoNumberVec, const Plane& refPlane, const ptree* ppt);
+	Leg(int legIdx, const Plane& refPlane, const ptree* ppt);
 	~Leg();
 	void setPosition(const Eigen::Vector3f& pos, int time = 500);
 	void setOrigin(const Eigen::Vector3f& newOrigin, int time = 500);
@@ -84,6 +89,7 @@ private:
 					_pos; //absolute
 	SideType _side;
 	const Plane& _refPlane;
+	const float _leg1Len, _leg2Len, _len3, _len4;
 };
 
 class Plane {
@@ -109,7 +115,7 @@ public:
 	Leg* leg_[6];
 	Eigen::Vector3f origin_, normal_, front_; //both normal_ and front_ should be normalized
 //	float roll_, pitch_, yaw_;
-	Eigen::Vector3f initLegOrigin_[6], initLegPos_[6];
+	//Eigen::Vector3f initLegOrigin_[6], initLegPos_[6];
 	Eigen::AngleAxisf rotater_;
 	Velocity vel_; //unit: mm/ms and rad/ms
 };
@@ -129,9 +135,8 @@ public:
 	int getPowerCycle();
 	void allServoMidPositon();
 
-	Plane base_;
 	Serial uart_;
-	PowerInterface power_;
+	Plane base_;
 private:
 	std::string _actionFileContents;
 	bool _actionFileContentsAvailiable;
