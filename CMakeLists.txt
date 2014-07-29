@@ -29,20 +29,24 @@ include_directories(${BOOST_INCLUDE_DIR})
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
-
 # set the default path for built executables to the "bin" directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 # set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 set( LIB_SRC
-    src/engine.cpp
-    src/serial.cpp
-    src/uscwrapper.cpp
+	src/engine.cpp
+	src/serial.cpp
+	src/uscwrapper.cpp
 )
 
 add_library( foundation SHARED ${LIB_SRC} )
 target_link_libraries( foundation ${BOOST_LIBRARIES} )
 
-add_executable( demo src/app/uscdemo.cpp )
-target_link_libraries( demo foundation )
+add_library( uscengine SHARED src/uscengine.c )
+
+add_executable( demo src/app/uscwrapperdemo.c )
+target_link_libraries( demo uscengine )
+
+add_executable( demo2 src/app/uscdemo.cpp )
+target_link_libraries( demo2 foundation )

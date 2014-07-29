@@ -10,14 +10,10 @@
 int main() {
 	initialize("/dev/ttyS0", "params.info");
 
-	walk(0, 50, 1000, 5);
+	walk(50, 0, 1000, 1);
 	std::cout << "-------\n";
-	walk(55, 0, 1000, 5);
-	std::cout << "-------\n";
-
-	turn(3.14 / 15, 1000, 5);
-	std::cout << "-------\n";
-	turn(-3.14 / 15, 1000, 5);
+		
+	turn(3.14 / 15, 1000, 1);
 	std::cout << "-------\n";
 
 	return 0;

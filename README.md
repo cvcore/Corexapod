@@ -30,16 +30,28 @@ Basically we have two ways to generate this file:
 A little explanation for the info file:
 We have four parts in this file:
 1.Length
+
 In our model, we mainly need four length constants
+
 ![image](doc/leg1Len.png)
+
 ![image](doc/leg2Len.png)
+
 2.Origin of each 'leg' with reference to 'center' of the robot.
+
 ![image](doc/base.png)
+
 3.Position of each leg's foot.
+
 4.Servo configuration
+
 minPW: pulse width for 0 deg of the servo motor
+
 maxPW: pulse width for 180 deg of the servo motor
+
 number: currently we are using torobot's usc-32 servo control board, so this is the channel of the servo
+
 5.Servo Association with leg
+
 We have 3DOF for each leg, so in this section we need to specify which servo a leg is going to use.
 

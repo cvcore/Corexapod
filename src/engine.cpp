@@ -189,6 +189,10 @@ Leg::Leg(int legIdx, const Plane& refPlane, const ptree* ppt) :
                           ppt->get<float>(posPath.str() + ".z"));
  	_origin = _initOrigin = vOrig;
  	_pos = vPos;
+	if(legIdx < 3)
+		_side = left;
+	else
+		_side = right;
  	for(int sIdx = 0; sIdx < 3; sIdx++) {
 		std::stringstream servoPath;
 		servoPath << "AssociateServo.l" << legIdx << ".s" << sIdx;
@@ -211,7 +215,7 @@ void Leg::setPosition(const Eigen::Vector3f& pos, int time) {
 					ol = _origin,
 					lp = pp - (_origin + _refPlane.origin_),
 					olp =  ol.cross(lp);
-	Eigen::Vector3f initNormal(Eigen::Vector3f::UnitZ());
+//	Eigen::Vector3f initNormal(Eigen::Vector3f::UnitZ());
 	float alpha = asin(_len3 / lp.norm()),
 		  beta = acos(ol.dot(lp) / (ol.norm() * lp.norm()));
 	if(olp.dot(_refPlane.normal_) < 0) {
@@ -476,10 +480,10 @@ void Plane::writeSerial(Serial& serial) {
 			}
 		}
 	}
-//	std::cout << ss.str() << std::endl;
+	std::cout << ss.str() << std::endl;
 	if(ss.str().size() != 0) {
 		ss << "\r\n";
-		serial.write(ss.str().c_str(), ss.str().size(), maxTime);
+		//serial.write(ss.str().c_str(), ss.str().size(), maxTime);
 	}
 
 }
@@ -591,7 +595,7 @@ void Hexapod::parseMovement() {
 	for(int minPos = min_element(nextT, nextT + 6) - nextT;
 			nextT[minPos] != std::numeric_limits<size_t>::max();
 			minPos = min_element(nextT, nextT + 6) - nextT) {
-			Leg *minLeg = base_.leg_[minPos];
+		Leg *minLeg = base_.leg_[minPos];
 		if(nextT[minPos] <= currT) {
 			if((++next[minPos]) == minLeg->moveGroup_.size())
 				nextT[minPos] = std::numeric_limits<size_t>::max();

@@ -13,3 +13,7 @@ src/test.cpp
 test
 *.PcbDocPreview
 *.SchDocPreview
+*.swp
+*.vim
+*ycm*
+.corexapod
