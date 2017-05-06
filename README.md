@@ -2,6 +2,8 @@
 A hexapod robot engine developed by STC Dev Team.
 Can be adapted to any common hexapod by just editing a few lines of configuration file.
 
+[![IMAGE ALT TEXT HERE](https://media.giphy.com/media/xQXnbPWD0taHS/giphy.gif)](https://www.youtube.com/watch?v=VbpylycdGjA)
+
 # Prerequsites
 * Eigen
 	http://eigen.tuxfamily.org
